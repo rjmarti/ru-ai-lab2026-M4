@@ -1,50 +1,114 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: [TEMPLATE] → 1.0.0 (initial ratification)
+- Modified principles: N/A (first concrete adoption; all placeholders replaced)
+- Added sections:
+  - Core Principles: I. Database-Sourced Truth (No Data Fabrication)
+  - Core Principles: II. No Hardcoded Secrets — Externalized Configuration
+  - Core Principles: III. Verifiable Acceptance Criteria (NON-NEGOTIABLE)
+  - Security & Configuration Standards
+  - Development Workflow & Quality Gates
+  - Governance
+- Removed sections: none (template placeholders only)
+- Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (generic "Constitution Check" gate references this file; no edits required)
+  - ✅ .specify/templates/spec-template.md (Functional Requirements / Success Criteria sections already support acceptance-criteria-to-test traceability; no edits required)
+  - ✅ .specify/templates/tasks-template.md (test tasks already templated per user story; no edits required — note tests are no longer optional under Principle III for any user story that defines acceptance scenarios)
+  - ✅ AGENTS.md (already enforces no hardcoded secrets / ILogger / DTO boundaries; consistent with this constitution, no edits required)
+  - N/A .specify/templates/commands/*.md (directory does not exist in this project)
+- Follow-up TODOs: none
+-->
+
+# SsoAdmin Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Database-Sourced Truth (No Data Fabrication)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+The system MUST NEVER present, return, or persist data that does not originate from the
+database (or another verified, auditable system of record explicitly sanctioned as such).
+Any value shown to a user, returned by an API, written to a log, or used in a business
+decision MUST be traceable to a database record, and that provenance MUST be verifiable in
+code review or via query. Placeholder values, mocked/synthetic data, silently-invented
+defaults, or LLM-generated data MUST NOT reach production paths. When a required value is
+missing, the system MUST fail explicitly (validation error, `NotFound`, etc.) rather than
+substitute a fabricated or guessed value.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: This is an SSO administration backend; invented identity, permission, or
+credential data is a direct security and trust failure, not a cosmetic bug.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. No Hardcoded Secrets — Externalized Configuration
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Secrets (connection strings, API keys, certificates, signing keys, credentials) MUST NEVER
+be committed to source code, checked into the repository, or embedded as literals. Every
+constant that represents an environment-specific concern — connection strings, file system
+paths, URLs/endpoints, timeouts, feature flags, and other internal parameters — MUST be
+externalized to configuration (e.g., `appsettings.json`, environment variables, or a secrets
+manager) and injected via the standard .NET configuration/DI pipeline. Code MUST read such
+values through configuration abstractions (`IOptions<T>`, `IConfiguration`, injected
+settings objects) rather than `const`/literal values scattered through the codebase.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Hardcoded secrets and environment-specific literals cause credential leaks,
+block promotion across environments, and make the system impossible to reconfigure without
+a rebuild.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Verifiable Acceptance Criteria (NON-NEGOTIABLE)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Every acceptance criterion (each `Given/When/Then` scenario, each functional requirement,
+each success criterion) defined in a feature specification MUST have at least one
+corresponding automated test that fails without the implementation and passes with it. A
+feature is not "done" until every acceptance criterion is covered and the mapping between
+criterion and test is identifiable (e.g., via test name, comment, or traceability doc).
+Untestable or unverifiable acceptance criteria MUST be rewritten until they are measurable
+and testable before implementation begins.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Acceptance criteria without tests are unverifiable claims; this project
+requires objective, repeatable proof that behavior matches specification, not manual
+assertion.
+
+## Security & Configuration Standards
+
+- Configuration MUST be layered per environment (Development/Staging/Production) using the
+  standard .NET configuration providers; production secrets MUST come from a secrets
+  manager or environment variables, never from files committed to source control.
+- Domain entities MUST NOT be exposed directly in API responses; DTOs MUST be used at all
+  API boundaries (per AGENTS.md).
+- Logging MUST use `ILogger<T>`; `System.Console.WriteLine` MUST NOT be used for
+  application logs.
+- Asynchronous code MUST use `await` end-to-end; blocking calls (`.Result`, `.Wait()`) MUST
+  NOT be introduced.
+
+## Development Workflow & Quality Gates
+
+- Every feature specification's acceptance scenarios and functional/success criteria MUST be
+  mapped to test cases in `[NombreProyecto].Test` before the feature is considered complete
+  (see Principle III).
+- Before declaring any task complete, the following MUST be run from the project root and
+  MUST pass: `dotnet restore`, `dotnet build`, `dotnet test`.
+- Code review (self- or peer-) MUST explicitly check for: (a) any data path that could
+  return non-database-sourced values, (b) any literal secret, path, URL, or internal
+  parameter that should be externalized, and (c) any acceptance criterion lacking test
+  coverage.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes conflicting ad-hoc practices for the SsoAdmin project.
+AGENTS.md (and CLAUDE.md, which imports it) provides the day-to-day coding conventions and
+runtime guidance that implement these principles; where AGENTS.md and this constitution
+conflict, this constitution prevails and AGENTS.md MUST be updated to match.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment procedure**: Amendments are proposed via PR modifying this file, including a
+Sync Impact Report as an HTML comment at the top of the file. Amendments MUST identify any
+templates or guidance docs (plan/spec/tasks templates, AGENTS.md) that require updates as a
+result, and those updates MUST land in the same PR or an immediately-following one.
+
+**Versioning policy**: This constitution follows semantic versioning:
+- MAJOR: Backward-incompatible governance changes or removal/redefinition of a principle.
+- MINOR: A new principle or materially expanded section is added.
+- PATCH: Clarifications, wording fixes, or non-semantic refinements.
+
+**Compliance review**: All PRs/reviews MUST verify compliance with the Core Principles
+above. Any deviation MUST be justified explicitly in the PR description and, if it recurs,
+raised as a proposed amendment rather than repeatedly waived.
+
+**Version**: 1.0.0 | **Ratified**: 2026-07-17 | **Last Amended**: 2026-07-17
