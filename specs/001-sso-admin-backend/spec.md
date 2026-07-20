@@ -8,6 +8,15 @@
 
 **Input**: User description: "PRD-001: Backend para un Single Sign On (SSO) — sistema que centraliza la administración de usuarios, credenciales, aplicaciones y permisos de acceso, y expone una API para que un SSO externo consulte si una credencial tiene acceso a una aplicación determinada."
 
+## Clarifications
+
+### Session 2026-07-20
+
+- Q: ¿Qué mecanismo de autenticación debe usar el endpoint `POST /api/sso/verificar` para el llamador externo (SSO)? → A: Requiere una clave de API (API key) compartida entre el SSO externo y el backend, enviada en un header.
+- Q: La sección "Assumptions" menciona "Fuera de Alcance" pero esa sección no existe en la spec. ¿Qué debe declararse explícitamente fuera de alcance? → A: Autogestión de usuarios finales (self-service) — los usuarios finales no pueden iniciar sesión ni gestionar sus propias credenciales/permisos; todo lo hace SI.
+- Q: ¿Cómo debe garantizarse la unicidad de `username`+`emisor` ante solicitudes concurrentes de creación de credenciales? → A: Mediante una restricción única a nivel de base de datos (unique constraint), igual que el edge case ya definido para permisos solapados.
+- Q: ¿Se requiere un log de auditoría (quién hizo qué cambio administrativo y cuándo) en esta etapa? → A: No se requiere un log de auditoría explícito en esta etapa; solo el estado actual de los datos persiste.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - SSO verifica acceso de una credencial a una aplicación (Priority: P1)
@@ -27,6 +36,7 @@ Un servicio SSO externo, luego de autenticar a un usuario final ante un proveedo
 5. **Given** un `username` o `emisor` que no existe en el sistema, **When** el SSO consulta, **Then** el sistema responde `200 OK` con `allowed=false` y `motivo=credencial_no_encontrada`.
 6. **Given** una credencial de un usuario sin ningún permiso registrado para la aplicación consultada, **When** el SSO consulta, **Then** el sistema responde `200 OK` con `allowed=false` y `motivo=permiso_no_encontrado`.
 7. **Given** una solicitud a la que le falta alguno de los campos requeridos, **When** el SSO consulta, **Then** el sistema responde `400 Bad Request`.
+8. **Given** una solicitud sin la clave de API o con una clave de API inválida, **When** el SSO consulta, **Then** el sistema responde `401 Unauthorized` sin evaluar la credencial.
 
 ---
 
@@ -90,12 +100,13 @@ Un miembro de SI registra las aplicaciones que participan del SSO (nombre y URL)
 - ¿Qué sucede si SI intenta eliminar una aplicación que tiene permisos activos asociados? El sistema debe permitir la eliminación (no hay requerimiento que lo impida) y las consultas SSO posteriores para esa aplicación deben responder `motivo=aplicacion_no_encontrada`.
 - ¿Qué sucede si SI intenta dar de baja a un usuario que ya está inactivo, o revocar un permiso ya vencido? La operación debe ser idempotente y no producir error.
 - ¿Qué sucede si dos solicitudes concurrentes intentan crear permisos solapados para el mismo usuario y aplicación? El sistema debe garantizar que solo una de ellas se persista exitosamente.
+- ¿Qué sucede si dos solicitudes concurrentes intentan crear una credencial con la misma combinación `username`+`emisor`? El sistema debe garantizar, mediante una restricción única a nivel de base de datos, que solo una de ellas se persista exitosamente y que la otra sea rechazada.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema MUST permitir crear una credencial asociada a un usuario, compuesta por `username` y `emisor`, validando que la combinación `username`+`emisor` sea única en todo el sistema.
+- **FR-001**: El sistema MUST permitir crear una credencial asociada a un usuario, compuesta por `username` y `emisor`, validando que la combinación `username`+`emisor` sea única en todo el sistema mediante una restricción única a nivel de base de datos, de forma que la unicidad se garantice incluso ante solicitudes de creación concurrentes.
 - **FR-002**: El sistema MUST permitir asociar múltiples credenciales a un mismo usuario, siempre que cada una provenga de un `emisor` distinto de las demás credenciales de ese usuario.
 - **FR-003**: El sistema MUST permitir registrar aplicaciones con un nombre y una URL, rechazando el registro o la edición cuando la URL esté vacía.
 - **FR-004**: El sistema MUST permitir otorgar un permiso de acceso de un usuario a una aplicación, con una `fecha_desde` obligatoria y una `fecha_hasta` opcional (ausencia de `fecha_hasta` significa acceso indefinido), rechazando la creación cuando el nuevo período se solape con un período ya existente del mismo usuario para la misma aplicación.
@@ -103,13 +114,14 @@ Un miembro de SI registra las aplicaciones que participan del SSO (nombre y URL)
 - **FR-006**: El sistema MUST permitir dar de baja lógica a un usuario, y esa baja MUST caducar automáticamente todos los permisos activos de ese usuario en todas las aplicaciones.
 - **FR-007**: El sistema MUST proveer un mecanismo de login para que los usuarios de SI se autentiquen antes de acceder a las funciones de administración, almacenando las credenciales de SI mediante un hash no reversible, y MUST precargar en el primer arranque un usuario `admin` con contraseña `admin`.
 - **FR-008**: El sistema MUST exponer un endpoint `POST /api/sso/verificar` que, dado `username`, `emisor` y `aplicacion_url`, responda con `allowed` (booleano) y `motivo` (solo presente cuando `allowed=false`, con uno de los valores: `credencial_no_encontrada`, `usuario_inactivo`, `aplicacion_no_encontrada`, `permiso_no_encontrado`, `permiso_vencido`).
-- **FR-009**: El endpoint de verificación MUST responder `200 OK` para toda solicitud bien formada (incluidas las denegaciones), `400 Bad Request` cuando falte algún campo requerido, y `500 Internal Server Error` ante un error inesperado.
+- **FR-009**: El endpoint de verificación MUST responder `200 OK` para toda solicitud bien formada (incluidas las denegaciones), `400 Bad Request` cuando falte algún campo requerido, `401 Unauthorized` cuando falte la clave de API o sea inválida, y `500 Internal Server Error` ante un error inesperado.
 - **FR-010**: El sistema MUST permitir, a un usuario de SI autenticado, listar todos los usuarios con su estado activo/inactivo, crear un nuevo usuario, editar su nombre, y darlo de baja lógica.
 - **FR-011**: El sistema MUST permitir, a un usuario de SI autenticado, listar todas las credenciales junto con el usuario asociado, crear una nueva credencial indicando usuario, `username` y `emisor`, y eliminar una credencial existente.
 - **FR-012**: El sistema MUST permitir, a un usuario de SI autenticado, listar todas las aplicaciones, registrar una nueva aplicación con nombre y URL, editar nombre y URL de una aplicación existente, y eliminar una aplicación.
 - **FR-013**: El sistema MUST NOT almacenar contraseñas de credenciales de usuarios finales; únicamente MUST persistir el `emisor` y el `username` de cada credencial.
 - **FR-014**: El endpoint `POST /api/sso/verificar` MUST responder en menos de 500 ms bajo una carga de referencia de hasta 100 aplicaciones y 3000 usuarios registrados.
 - **FR-015**: La baja lógica de un usuario MUST caducar todos sus permisos activos en menos de 3 segundos desde que se solicita la baja.
+- **FR-016**: El endpoint `POST /api/sso/verificar` MUST exigir una clave de API (API key) enviada en un header de la solicitud, validarla contra un valor configurado de forma externalizada, y rechazar con `401 Unauthorized` cualquier solicitud sin clave de API o con una clave inválida, antes de evaluar la credencial.
 
 ### Key Entities
 
@@ -130,6 +142,12 @@ Un miembro de SI registra las aplicaciones que participan del SSO (nombre y URL)
 - **SC-005**: El 100% de los intentos de crear un permiso solapado para el mismo usuario y aplicación son rechazados con un mensaje de error claro.
 - **SC-006**: Una auditoría de los registros de credenciales no encuentra ningún campo con contraseñas, hashes o derivados de contraseñas de usuarios finales.
 - **SC-007**: Un miembro de SI puede completar el ciclo de alta de un usuario, sus credenciales y su permiso de acceso a una aplicación en menos de 2 minutos usando la aplicación web.
+
+## Fuera de Alcance
+
+- Autogestión de usuarios finales (self-service): los usuarios finales (dueños de credenciales) no tienen ningún mecanismo de login ni interfaz propia para ver o gestionar sus credenciales o permisos; toda gestión es realizada por un miembro de SI a través de la aplicación de administración.
+- Log de auditoría: no se requiere un registro de auditoría (quién realizó qué cambio administrativo y cuándo) en esta etapa; el sistema solo persiste el estado actual de los datos, no su historial de cambios.
+- Roles diferenciados de SI: no se requieren roles ni niveles de permiso distintos entre usuarios de SI; cualquier usuario de SI autenticado tiene acceso completo a las funciones de administración.
 
 ## Assumptions
 

@@ -7,7 +7,7 @@ Este proyecto es una aplicación para administrar un Backend para un Single Sign
 - **Lenguaje:** C# 12
 - **Frameworks:** .NET 10 
 - **Frontend:** ASP.NET, Razor, Bootstrap, Javascript Vanilla.
-- **Patrones de Arquitectura:** Clean Architecture, Domain-Driven Design (DDD), Inyección de Dependencias.
+- **Patrones de Arquitectura:** Vertical Slice Architecture, Domain-Driven Design (DDD), Inyección de Dependencias.
 - **ORM:** Entity Framework Core
 
 ## 2. Convenciones de Código y Estilo
