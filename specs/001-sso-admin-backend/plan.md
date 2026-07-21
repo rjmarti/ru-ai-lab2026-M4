@@ -93,27 +93,28 @@ SsoAdmin.Application/             # Vertical Slice Architecture: un folder por c
 │   └── GestionPermisos/           # US4 — otorgar/revocar, validación de solapamiento
 └── Common/                        # Interfaces compartidas, resultado de dominio, excepciones
 
-SsoAdmin.API/                     # Host ASP.NET Core — API JSON consumida por SSO externo y por Web (JS vanilla)
-├── Controllers/ (o Minimal API endpoints)
-│   ├── SsoController.cs           # POST /api/sso/verificar (auth: API key)
-│   ├── UsuariosController.cs
-│   ├── CredencialesController.cs
-│   ├── AplicacionesController.cs
-│   ├── PermisosController.cs
-│   └── AuthController.cs          # login SI (auth: cookie)
+SsoAdmin.API/                     # Host ASP.NET Core — expone únicamente el contrato externo consumido por el SSO
+├── Controllers/
+│   └── SsoController.cs           # POST /api/sso/verificar (auth: API key)
 ├── Auth/
 │   └── ApiKeyAuthenticationHandler.cs
 ├── DTOs/
 └── Program.cs
 
-SsoAdmin.Web/                     # Host ASP.NET Core — Razor Pages, Bootstrap, JS vanilla, cookie auth
+SsoAdmin.Web/                     # Host ASP.NET Core — Razor Pages + su propia API interna, cookie auth
 ├── Pages/
 │   ├── Login.cshtml
 │   ├── Usuarios/
 │   ├── Credenciales/
 │   ├── Aplicaciones/
 │   └── Permisos/
-├── wwwroot/js/                    # fetch() a SsoAdmin.API para listar/crear/editar/eliminar
+├── Controllers/                   # API interna consumida same-origin por wwwroot/js (mismo host: sin salto de cookie)
+│   ├── AuthController.cs          # login SI, emite cookie de este mismo host
+│   ├── UsuariosController.cs
+│   ├── CredencialesController.cs
+│   ├── AplicacionesController.cs
+│   └── PermisosController.cs
+├── wwwroot/js/                    # fetch() same-origin a los Controllers de este mismo host
 └── Program.cs
 
 SsoAdmin.Test/                    # xUnit
@@ -122,7 +123,7 @@ SsoAdmin.Test/                    # xUnit
 └── TestFixtures/
 ```
 
-**Structure Decision**: Aplicación web (Option 2 del template) adaptada a los seis proyectos exigidos por AGENTS.md §3. `API` y `Web` son hosts ASP.NET Core independientes y desplegables por separado (para no acoplar el SLA de <500ms del endpoint SSO al ciclo de vida de la app de administración), y ambos referencian `Application`, `Data` y `Models` directamente en proceso — sin salto HTTP interno entre `Web` y `API`. Dentro de `Application`, el código se organiza por **Vertical Slice** (un folder por caso de uso, con su propio Command/Query, Handler, Validator y DTOs) en lugar de por capas técnicas horizontales, consistente con el patrón de arquitectura exigido por AGENTS.md.
+**Structure Decision**: Aplicación web (Option 2 del template) adaptada a los seis proyectos exigidos por AGENTS.md §3. `API` y `Web` son hosts ASP.NET Core independientes y desplegables por separado (para no acoplar el SLA de <500ms del endpoint SSO al ciclo de vida de la app de administración), y ambos referencian `Application`, `Data` y `Models` directamente en proceso — sin salto HTTP interno entre `Web` y `API`. El contrato de administración (auth, usuarios, credenciales, aplicaciones, permisos) se expone como API interna dentro del propio host `Web` (mismo origen que su JS vanilla), evitando cualquier configuración de cookie/CORS cross-host; `SsoAdmin.API` expone exclusivamente `POST /api/sso/verificar` para el consumidor externo. Dentro de `Application`, el código se organiza por **Vertical Slice** (un folder por caso de uso, con su propio Command/Query, Handler, Validator y DTOs) en lugar de por capas técnicas horizontales, consistente con el patrón de arquitectura exigido por AGENTS.md.
 
 ## Complexity Tracking
 

@@ -17,7 +17,7 @@ Todas las decisiones tecnológicas de alto nivel (lenguaje C# 12, .NET 10, EF Co
 ## 3. Autenticación del login de SI (app Web)
 
 - **Decision**: `Microsoft.AspNetCore.Authentication.Cookies` en `SsoAdmin.Web`; el formulario de login (US2) valida contra `LoginSI` vía `PasswordHasher<T>` y, si es válido, emite una cookie de autenticación; páginas administrativas protegidas con `[Authorize]`.
-- **Rationale**: Encaja naturalmente con Razor Pages/MVC server-rendered; no se requiere token JWT porque no hay cliente SPA ni consumidor externo del login de SI (solo el propio navegador).
+- **Rationale**: Encaja naturalmente con Razor Pages/MVC server-rendered; no se requiere token JWT porque no hay cliente SPA ni consumidor externo del login de SI (solo el propio navegador). Para que la cookie sea válida sin configuración adicional de CORS ni de key ring compartido, los endpoints de administración (`/api/auth/*`, `/api/usuarios`, `/api/credenciales`, `/api/aplicaciones`, `/api/permisos`) se hospedan como controllers dentro del propio host `SsoAdmin.Web` — no en `SsoAdmin.API` — de modo que el `fetch()` de `wwwroot/js` sea siempre same-origin. `SsoAdmin.API` únicamente expone `POST /api/sso/verificar` (autenticado por API key) para el consumidor externo.
 - **Alternatives considered**: JWT en `localStorage` (superficie de ataque XSS mayor, innecesario para una app server-rendered de un solo host).
 
 ## 4. Persistencia y unicidad de `username`+`emisor` bajo concurrencia

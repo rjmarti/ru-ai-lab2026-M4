@@ -1,6 +1,6 @@
-# Contract: API de Administración (consumida por SsoAdmin.Web)
+# Contract: API de Administración (hospedada dentro de SsoAdmin.Web)
 
-Endpoints internos usados por la app Web (Razor + Bootstrap + JS vanilla) para las funciones de SI (US2, US3, US4). Autenticación: cookie de sesión emitida por `POST /api/auth/login` (research.md #3); todos los demás endpoints de esta sección requieren `[Authorize]` (cookie válida) y devuelven `401 Unauthorized` si no la hay.
+Endpoints internos hospedados en el mismo host que `SsoAdmin.Web` (no en `SsoAdmin.API`), consumidos same-origin por su propio `wwwroot/js` vanilla para las funciones de SI (US2, US3, US4). Al vivir en el mismo proceso/host que las Razor Pages, la cookie de sesión emitida por `POST /api/auth/login` es válida sin configuración adicional de CORS ni de key ring compartido. Todos los demás endpoints de esta sección requieren `[Authorize]` (cookie válida) y devuelven `401 Unauthorized` si no la hay. `SsoAdmin.API` no expone ninguno de estos endpoints; su único endpoint es `POST /api/sso/verificar` (ver `contracts/sso-verificar.md`).
 
 Todas las respuestas usan DTOs — nunca las entidades de `SsoAdmin.Models` (restricción AGENTS.md §4 / Constitution: DTOs en el borde de la API).
 

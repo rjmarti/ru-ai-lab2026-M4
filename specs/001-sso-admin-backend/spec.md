@@ -156,4 +156,4 @@ Un miembro de SI registra las aplicaciones que participan del SSO (nombre y URL)
 - No se requiere un flujo de reactivación de un Usuario dado de baja en esta etapa; la baja lógica es unidireccional para el alcance actual.
 - El algoritmo específico de hashing para la contraseña de Login de SI queda a criterio de la fase de diseño técnico, siempre que sea no reversible (estándar de la industria).
 - No se requieren roles ni niveles de permiso diferenciados entre usuarios de SI; cualquier usuario de SI autenticado tiene acceso completo a las funciones de administración (consistente con "Fuera de Alcance").
-- Los 100 aplicaciones / 3000 usuarios de RNF-01 se toman como volumen de referencia para diseño y pruebas de rendimiento, no como un límite estricto impuesto al sistema.
+- Los 100 aplicaciones / 3000 usuarios de FR-014/SC-001 se toman como volumen de referencia para diseño y pruebas de rendimiento, no como un límite estricto impuesto al sistema.

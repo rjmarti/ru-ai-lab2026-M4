@@ -1,6 +1,6 @@
 Summary
 
-Total tasks: 75 (T001–T075)
+Total tasks: 75 (T001–T076, gap at T027)
 
 Per phase:
 - Phase 1 (Setup): 4 tasks
@@ -9,7 +9,14 @@ Per phase:
 - Phase 4 (US2 — Login SI + baja unificada, P2): 14 tasks (3 tests + 11 impl)
 - Phase 5 (US3 — Gestión de credenciales, P3): 7 tasks (2 tests + 5 impl)
 - Phase 6 (US4 — Aplicaciones y permisos, P4): 14 tasks (4 tests + 10 impl)
-- Phase 7 (Polish): 5 tasks
+- Phase 7 (Polish): 6 tasks
+
+Remediation applied post-`/speckit-analyze` (2026-07-21):
+- I1 (CRITICAL): the internal admin API (auth/usuarios/credenciales/aplicaciones/permisos) now lives in `SsoAdmin.Web/Controllers/` instead of `SsoAdmin.API`, so its cookie stays same-origin with the Web JS that calls it — no cross-host cookie/CORS/key-ring config needed. `SsoAdmin.API` now hosts only `SsoController` (the external SSO contract). Updated in plan.md, research.md #3, contracts/admin-api.md, and tasks T024/T025/T041/T042/T047/T055/T063/T068.
+- C1 (CRITICAL): T050 extended to cover the FR-002 positive path (one usuario, two credenciales, two distinct emisores).
+- C2 (CRITICAL): T028 extended to cover the FR-009 `500 Internal Server Error` path via a faulted repository.
+- C3 (CRITICAL): added T076 tracing SC-007 (2-minute onboarding cycle).
+- I2 (LOW): spec.md's dangling "RNF-01" reference corrected to "FR-014/SC-001".
 
 Parallel opportunities: entity creation (T005–T009), configurations (T011–T015), and repositories (T019–T023) each parallelize within Foundational; all test tasks within a story parallelize (distinct files); once Foundational is done, all four user stories can be staffed in parallel; Razor Pages/JS tasks parallelize across stories.
 
@@ -18,3 +25,5 @@ Independent test criteria (from spec.md, preserved per story): US1 — preload d
 Suggested MVP scope: User Story 1 only (Setup + Foundational + Phase 3) — delivers the SSO-consumable POST /api/sso/verificar contract independent of any admin UI.
 
 Format validation: All 75 tasks use - [ ] T### [P?] [Story?] Description with exact file path; [Story] labels appear only in Phases 3–6; Setup/Foundational/Polish carry no story label, per the required checklist format.
+
+Not applied: I3 (LOW, the T027 numbering gap) — fixing it would require renumbering every task from T028 through the new T076 (and all their cross-references) for a purely cosmetic issue, so it was left as-is per the original remediation note.

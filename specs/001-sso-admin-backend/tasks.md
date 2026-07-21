@@ -25,8 +25,8 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 - `SsoAdmin.Models/` — domain entities
 - `SsoAdmin.Data/` — EF Core DbContext, configurations, migrations, seed, repositories
 - `SsoAdmin.Application/` — Vertical Slice features (Command/Query + Handler + Validator + DTOs)
-- `SsoAdmin.API/` — ASP.NET Core host: controllers, API key auth, Program.cs
-- `SsoAdmin.Web/` — ASP.NET Core host: Razor Pages, Bootstrap, JS vanilla, cookie auth
+- `SsoAdmin.API/` — ASP.NET Core host: `SsoController` only (external SSO contract), API key auth, Program.cs
+- `SsoAdmin.Web/` — ASP.NET Core host: Razor Pages, Bootstrap, JS vanilla, cookie auth, plus the internal admin API controllers (auth/usuarios/credenciales/aplicaciones/permisos) consumed same-origin by its own JS
 - `SsoAdmin.Test/` — xUnit: `Unit/`, `Integration/`, `TestFixtures/`
 
 ---
@@ -69,8 +69,8 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 - [ ] T021 [P] Create `IAplicacionRepository` + `AplicacionRepository` in `SsoAdmin.Data/Repositories/AplicacionRepository.cs` (depends on T010)
 - [ ] T022 [P] Create `IPermisoAccesoRepository` + `PermisoAccesoRepository`, with an overlap-check query executed inside a `Serializable` transaction, in `SsoAdmin.Data/Repositories/PermisoAccesoRepository.cs` (depends on T010, T014)
 - [ ] T023 [P] Create `ILoginSIRepository` + `LoginSIRepository` in `SsoAdmin.Data/Repositories/LoginSIRepository.cs` (depends on T010)
-- [ ] T024 Configure `SsoAdmin.API/Program.cs`: `DbContext` registration via `IConfiguration`, DI registration of all repositories, controllers, Swashbuckle/OpenAPI (depends on T016, T019-T023)
-- [ ] T025 Configure `SsoAdmin.Web/Program.cs`: `DbContext` registration, DI registration of all repositories, cookie authentication scheme, Razor Pages, static files (depends on T016, T019-T023)
+- [ ] T024 Configure `SsoAdmin.API/Program.cs`: `DbContext` registration via `IConfiguration`, DI registration of the repositories used by `VerificarAcceso`, `SsoController` routing, ApiKey scheme, Swashbuckle/OpenAPI for the sso-verificar contract only (depends on T016, T019-T023)
+- [ ] T025 Configure `SsoAdmin.Web/Program.cs`: `DbContext` registration, DI registration of all repositories, cookie authentication scheme, MVC controllers (internal admin API) + Razor Pages, static files (depends on T016, T019-T023)
 - [ ] T026 [P] Create `WebApplicationFactory`-based test fixtures using the SQLite relational provider (not `InMemory`) for `SsoAdmin.API` and `SsoAdmin.Web` in `SsoAdmin.Test/TestFixtures/` (depends on T024, T025)
 
 **Checkpoint**: `dotnet build` succeeds across the solution; `dotnet ef database update` applies `InitialCreate`; both hosts start; test fixtures can spin up an in-memory SQLite-backed host. User story implementation can now begin.
@@ -85,7 +85,7 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T028 [P] [US1] Integration test suite covering AC1-AC8 (allowed=true, `permiso_vencido`, `usuario_inactivo`, `aplicacion_no_encontrada`, `credencial_no_encontrada`, `permiso_no_encontrado` incl. `fecha_desde` futura edge case, missing-field 400, missing/invalid API key 401) in `SsoAdmin.Test/Integration/SsoVerificarEndpointTests.cs` (depends on T026)
+- [ ] T028 [P] [US1] Integration test suite covering AC1-AC8 (allowed=true, `permiso_vencido`, `usuario_inactivo`, `aplicacion_no_encontrada`, `credencial_no_encontrada`, `permiso_no_encontrado` incl. `fecha_desde` futura edge case, missing-field 400, missing/invalid API key 401) plus a `500 Internal Server Error` scenario (FR-009) by substituting a faulted repository into the test `WebApplicationFactory`, in `SsoAdmin.Test/Integration/SsoVerificarEndpointTests.cs` (depends on T026, API fixture)
 - [ ] T029 [P] [US1] Unit tests for `VerificarAccesoHandler` motivo precedence and business rules (no HTTP, no I/O) in `SsoAdmin.Test/Unit/VerificarAccesoHandlerTests.cs`
 
 ### Implementation for User Story 1
@@ -109,21 +109,21 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T036 [P] [US2] Integration tests for `POST /api/auth/login`/`logout` — valid credentials issue a cookie (AC1), invalid credentials return 401 (AC2) — in `SsoAdmin.Test/Integration/AuthControllerTests.cs` (depends on T026)
-- [ ] T037 [P] [US2] Integration tests for `/api/usuarios` listar/crear/editar/baja, including the cascade of active permisos on baja and idempotent baja on an already-inactive usuario (AC3, AC4, FR-006, edge case) in `SsoAdmin.Test/Integration/UsuariosControllerTests.cs` (depends on T026)
+- [ ] T036 [P] [US2] Integration tests for `POST /api/auth/login`/`logout` — valid credentials issue a cookie (AC1), invalid credentials return 401 (AC2) — in `SsoAdmin.Test/Integration/AuthControllerTests.cs` (depends on T026, Web fixture)
+- [ ] T037 [P] [US2] Integration tests for `/api/usuarios` listar/crear/editar/baja, including the cascade of active permisos on baja and idempotent baja on an already-inactive usuario (AC3, AC4, FR-006, edge case) in `SsoAdmin.Test/Integration/UsuariosControllerTests.cs` (depends on T026, Web fixture)
 - [ ] T038 [P] [US2] Unit test asserting `DarBajaUsuarioHandler` expires every active `PermisoAcceso` for the usuario within the same operation in `SsoAdmin.Test/Unit/DarBajaUsuarioHandlerTests.cs`
 
 ### Implementation for User Story 2
 
 - [ ] T039 [US2] Create `LoginRequest`/`LoginResponse` DTOs + `LoginValidator` in `SsoAdmin.Application/Features/AuthSI/AuthDtos.cs`
 - [ ] T040 [US2] Implement `LoginHandler` validating against `LoginSI` via `PasswordHasher<T>` in `SsoAdmin.Application/Features/AuthSI/LoginHandler.cs` (depends on T023, T039)
-- [ ] T041 [US2] Create `AuthController` with `POST /api/auth/login` (cookie sign-in) and `POST /api/auth/logout` in `SsoAdmin.API/Controllers/AuthController.cs` (depends on T040)
-- [ ] T042 [P] [US2] Configure cookie authentication scheme (login path, cookie name/expiry) in `SsoAdmin.API/Program.cs` and `SsoAdmin.Web/Program.cs` (depends on T024, T025)
+- [ ] T041 [US2] Create `AuthController` with `POST /api/auth/login` (cookie sign-in) and `POST /api/auth/logout` in `SsoAdmin.Web/Controllers/AuthController.cs` (depends on T040)
+- [ ] T042 [P] [US2] Configure cookie authentication scheme (login path, cookie name/expiry) in `SsoAdmin.Web/Program.cs` (depends on T025)
 - [ ] T043 [US2] Create `UsuarioListItem`/`CrearUsuarioRequest`/`EditarUsuarioRequest` DTOs in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioDtos.cs`
 - [ ] T044 [P] [US2] Create `CrearUsuarioValidator`/`EditarUsuarioValidator` (nombre no vacío) in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioValidators.cs`
 - [ ] T045 [US2] Implement `ListarUsuariosHandler`, `CrearUsuarioHandler`, `EditarUsuarioHandler` in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioHandlers.cs` (depends on T019, T043, T044)
 - [ ] T046 [US2] Implement `DarBajaUsuarioHandler` — sets `Activo=false` and, in the same transaction, sets `FechaHasta=hoy` on every active `PermisoAcceso` of the usuario; idempotent when already inactive (FR-006/FR-015) in `SsoAdmin.Application/Features/GestionUsuarios/DarBajaUsuarioHandler.cs` (depends on T019, T022)
-- [ ] T047 [US2] Create `UsuariosController` (`GET`/`POST`/`PUT /api/usuarios`, `POST /api/usuarios/{id}/baja`) with `[Authorize]` cookie auth in `SsoAdmin.API/Controllers/UsuariosController.cs` (depends on T045, T046)
+- [ ] T047 [US2] Create `UsuariosController` (`GET`/`POST`/`PUT /api/usuarios`, `POST /api/usuarios/{id}/baja`) with `[Authorize]` cookie auth in `SsoAdmin.Web/Controllers/UsuariosController.cs` (depends on T045, T046)
 - [ ] T048 [P] [US2] Create `Login.cshtml`/`Login.cshtml.cs` page posting to `/api/auth/login` in `SsoAdmin.Web/Pages/Login.cshtml`
 - [ ] T049 [P] [US2] Create Usuarios Razor pages (listar/crear/editar/baja) and `wwwroot/js/usuarios.js` fetch calls against `/api/usuarios` in `SsoAdmin.Web/Pages/Usuarios/`
 
@@ -139,15 +139,15 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T050 [P] [US3] Integration tests for `/api/credenciales`: duplicate `username`+`emisor` → 400 (AC1), reassigning an existing credencial to another usuario → 400 (AC2), listar/crear/eliminar (AC3), and confirming no password/hash field exists on the entity (AC4/SC-006) in `SsoAdmin.Test/Integration/CredencialesControllerTests.cs` (depends on T026)
-- [ ] T051 [P] [US3] Integration test firing two concurrent `POST /api/credenciales` requests with the same `username`+`emisor` and asserting exactly one persists (edge case, FR-001) in `SsoAdmin.Test/Integration/CredencialConcurrencyTests.cs` (depends on T026)
+- [ ] T050 [P] [US3] Integration tests for `/api/credenciales`: duplicate `username`+`emisor` → 400 (AC1), reassigning an existing credencial to another usuario → 400 (AC2), listar/crear/eliminar (AC3), confirming no password/hash field exists on the entity (AC4/SC-006), and confirming a single usuario can hold two credenciales with the same `username` under two different `emisor` values (FR-002 positive path) in `SsoAdmin.Test/Integration/CredencialesControllerTests.cs` (depends on T026, Web fixture)
+- [ ] T051 [P] [US3] Integration test firing two concurrent `POST /api/credenciales` requests with the same `username`+`emisor` and asserting exactly one persists (edge case, FR-001) in `SsoAdmin.Test/Integration/CredencialConcurrencyTests.cs` (depends on T026, Web fixture)
 
 ### Implementation for User Story 3
 
 - [ ] T052 [US3] Create `CredencialListItem`/`CrearCredencialRequest` DTOs in `SsoAdmin.Application/Features/GestionCredenciales/CredencialDtos.cs`
 - [ ] T053 [P] [US3] Create `CrearCredencialValidator` in `SsoAdmin.Application/Features/GestionCredenciales/CrearCredencialValidator.cs`
 - [ ] T054 [US3] Implement `ListarCredencialesHandler`, `CrearCredencialHandler` (maps the unique-index violation from `CredencialRepository` to a `400` domain error), `EliminarCredencialHandler` in `SsoAdmin.Application/Features/GestionCredenciales/CredencialHandlers.cs` (depends on T020, T052, T053)
-- [ ] T055 [US3] Create `CredencialesController` (`GET`/`POST`/`DELETE /api/credenciales`) with `[Authorize]` in `SsoAdmin.API/Controllers/CredencialesController.cs` (depends on T054)
+- [ ] T055 [US3] Create `CredencialesController` (`GET`/`POST`/`DELETE /api/credenciales`) with `[Authorize]` in `SsoAdmin.Web/Controllers/CredencialesController.cs` (depends on T054)
 - [ ] T056 [P] [US3] Create Credenciales Razor pages (listar/crear/eliminar) and `wwwroot/js/credenciales.js` in `SsoAdmin.Web/Pages/Credenciales/`
 
 **Checkpoint**: User Stories 1, 2, and 3 all work independently.
@@ -162,21 +162,21 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T057 [P] [US4] Integration tests for `/api/aplicaciones`: empty-URL registration/edit → 400 (AC1), listar/crear/editar/eliminar (AC4) in `SsoAdmin.Test/Integration/AplicacionesControllerTests.cs` (depends on T026)
-- [ ] T058 [P] [US4] Integration tests for `/api/permisos`: overlapping period → 409 (AC2, incl. exact-date-match and pre-existing indefinite-permiso edge cases), `fecha_desde > fecha_hasta` → 400 (edge case), revoke sets `fecha_hasta=hoy` and a subsequent SSO query returns `permiso_vencido` (AC3) in `SsoAdmin.Test/Integration/PermisosControllerTests.cs` (depends on T026)
-- [ ] T059 [P] [US4] Integration test firing two concurrent `POST /api/permisos` requests with overlapping periods for the same usuario+aplicación and asserting exactly one persists (edge case, FR-004, `Serializable` isolation) in `SsoAdmin.Test/Integration/PermisoConcurrencyTests.cs` (depends on T026)
-- [ ] T060 [P] [US4] Integration test deleting an aplicación with active permisos and confirming a subsequent SSO query returns `motivo=aplicacion_no_encontrada` (edge case) in `SsoAdmin.Test/Integration/AplicacionEliminacionTests.cs` (depends on T026)
+- [ ] T057 [P] [US4] Integration tests for `/api/aplicaciones`: empty-URL registration/edit → 400 (AC1), listar/crear/editar/eliminar (AC4) in `SsoAdmin.Test/Integration/AplicacionesControllerTests.cs` (depends on T026, Web fixture)
+- [ ] T058 [P] [US4] Integration tests for `/api/permisos`: overlapping period → 409 (AC2, incl. exact-date-match and pre-existing indefinite-permiso edge cases), `fecha_desde > fecha_hasta` → 400 (edge case), revoke sets `fecha_hasta=hoy` and a subsequent SSO query returns `permiso_vencido` (AC3) in `SsoAdmin.Test/Integration/PermisosControllerTests.cs` (depends on T026, Web fixture)
+- [ ] T059 [P] [US4] Integration test firing two concurrent `POST /api/permisos` requests with overlapping periods for the same usuario+aplicación and asserting exactly one persists (edge case, FR-004, `Serializable` isolation) in `SsoAdmin.Test/Integration/PermisoConcurrencyTests.cs` (depends on T026, Web fixture)
+- [ ] T060 [P] [US4] Integration test deleting an aplicación with active permisos and confirming a subsequent SSO query returns `motivo=aplicacion_no_encontrada` (edge case) in `SsoAdmin.Test/Integration/AplicacionEliminacionTests.cs` (depends on T026, Web fixture for the deletion + API fixture for the SSO follow-up query)
 
 ### Implementation for User Story 4
 
 - [ ] T061 [US4] Create `AplicacionListItem`/`CrearAplicacionRequest`/`EditarAplicacionRequest` DTOs + validator (URL no vacía, FR-003) in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionDtos.cs`
 - [ ] T062 [US4] Implement `ListarAplicacionesHandler`, `CrearAplicacionHandler`, `EditarAplicacionHandler`, `EliminarAplicacionHandler` in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionHandlers.cs` (depends on T021, T061)
-- [ ] T063 [US4] Create `AplicacionesController` (`GET`/`POST`/`PUT`/`DELETE /api/aplicaciones`) with `[Authorize]` in `SsoAdmin.API/Controllers/AplicacionesController.cs` (depends on T062)
+- [ ] T063 [US4] Create `AplicacionesController` (`GET`/`POST`/`PUT`/`DELETE /api/aplicaciones`) with `[Authorize]` in `SsoAdmin.Web/Controllers/AplicacionesController.cs` (depends on T062)
 - [ ] T064 [US4] Create `PermisoListItem`/`OtorgarPermisoRequest` DTOs in `SsoAdmin.Application/Features/GestionPermisos/PermisoDtos.cs`
 - [ ] T065 [P] [US4] Create `OtorgarPermisoValidator` (`fecha_desde <= fecha_hasta` when present) in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoValidator.cs`
 - [ ] T066 [US4] Implement `OtorgarPermisoHandler` running the overlap check (incl. exact-match and open-ended-permiso edge cases) inside the `Serializable` transaction from `PermisoAccesoRepository` in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoHandler.cs` (depends on T022, T064, T065)
 - [ ] T067 [US4] Implement `ListarPermisosHandler` (optional `usuarioId`/`aplicacionId` filters) and `RevocarPermisoHandler` (sets `FechaHasta=hoy`, idempotent) in `SsoAdmin.Application/Features/GestionPermisos/PermisoHandlers.cs` (depends on T022, T064)
-- [ ] T068 [US4] Create `PermisosController` (`GET /api/permisos`, `POST /api/permisos`, `POST /api/permisos/{id}/revocar`) with `[Authorize]` in `SsoAdmin.API/Controllers/PermisosController.cs` (depends on T066, T067)
+- [ ] T068 [US4] Create `PermisosController` (`GET /api/permisos`, `POST /api/permisos`, `POST /api/permisos/{id}/revocar`) with `[Authorize]` in `SsoAdmin.Web/Controllers/PermisosController.cs` (depends on T066, T067)
 - [ ] T069 [P] [US4] Create Aplicaciones Razor pages (listar/crear/editar/eliminar) and `wwwroot/js/aplicaciones.js` in `SsoAdmin.Web/Pages/Aplicaciones/`
 - [ ] T070 [P] [US4] Create Permisos Razor pages (listar/otorgar/revocar) and `wwwroot/js/permisos.js` in `SsoAdmin.Web/Pages/Permisos/`
 
@@ -193,6 +193,7 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 - [ ] T073 [P] Performance test asserting baja lógica of a usuario with permisos across multiple aplicaciones expires all of them in <3s (FR-015/SC-002) in `SsoAdmin.Test/Integration/BajaUsuarioPerformanceTests.cs`
 - [ ] T074 [P] Constitution compliance sweep: confirm `ILogger<T>` is used everywhere (no `Console.WriteLine`), no `.Result`/`.Wait()` blocking calls, and `SsoAdmin.API` responses never expose `SsoAdmin.Models` entities directly
 - [ ] T075 Run the full `quickstart.md` validation end-to-end (`dotnet restore && dotnet build && dotnet test`, then the manual Web + SSO curl flow) and confirm every step passes
+- [ ] T076 [P] Timed walkthrough asserting SC-007: script or manual-QA checklist (tied to `quickstart.md` §5) driving the full onboarding cycle — crear usuario → crear credencial → otorgar permiso — through `SsoAdmin.Web`, asserting completion in under 2 minutes, in `SsoAdmin.Test/Integration/OnboardingTimingTests.cs` (or a documented manual-QA step if UI-timing automation is out of scope)
 
 ---
 
