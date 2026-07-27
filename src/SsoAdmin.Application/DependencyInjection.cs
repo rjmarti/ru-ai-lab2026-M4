@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SsoAdmin.Application.Features.AuthSI;
+using SsoAdmin.Application.Features.GestionCredenciales;
 using SsoAdmin.Application.Features.GestionUsuarios;
 using SsoAdmin.Application.Features.VerificarAcceso;
 
@@ -30,6 +31,12 @@ public static class DependencyInjection
         services.AddScoped<CrearUsuarioHandler>();
         services.AddScoped<EditarUsuarioHandler>();
         services.AddScoped<DarBajaUsuarioHandler>();
+
+        // US3 — Gestión de credenciales.
+        services.AddScoped<IValidator<CrearCredencialRequest>, CrearCredencialValidator>();
+        services.AddScoped<ListarCredencialesHandler>();
+        services.AddScoped<CrearCredencialHandler>();
+        services.AddScoped<EliminarCredencialHandler>();
 
         return services;
     }

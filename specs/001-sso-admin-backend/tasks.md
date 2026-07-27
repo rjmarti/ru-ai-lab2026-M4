@@ -142,16 +142,16 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T050 [P] [US3] Integration tests for `/api/credenciales`: duplicate `username`+`emisor` → 400 (AC1), reassigning an existing credencial to another usuario → 400 (AC2), listar/crear/eliminar (AC3), confirming no password/hash field exists on the entity (AC4/SC-006), and confirming a single usuario can hold two credenciales with the same `username` under two different `emisor` values (FR-002 positive path) in `SsoAdmin.Test/Integration/CredencialesControllerTests.cs` (depends on T026, Web fixture)
-- [ ] T051 [P] [US3] Integration test firing two concurrent `POST /api/credenciales` requests with the same `username`+`emisor` and asserting exactly one persists (edge case, FR-001) in `SsoAdmin.Test/Integration/CredencialConcurrencyTests.cs` (depends on T026, Web fixture)
+- [X] T050 [P] [US3] Integration tests for `/api/credenciales`: duplicate `username`+`emisor` → 400 (AC1), reassigning an existing credencial to another usuario → 400 (AC2), listar/crear/eliminar (AC3), confirming no password/hash field exists on the entity (AC4/SC-006), and confirming a single usuario can hold two credenciales with the same `username` under two different `emisor` values (FR-002 positive path) in `SsoAdmin.Test/Integration/CredencialesControllerTests.cs` (depends on T026, Web fixture)
+- [X] T051 [P] [US3] Integration test firing two concurrent `POST /api/credenciales` requests with the same `username`+`emisor` and asserting exactly one persists (edge case, FR-001) in `SsoAdmin.Test/Integration/CredencialConcurrencyTests.cs` (depends on T026, Web fixture)
 
 ### Implementation for User Story 3
 
-- [ ] T052 [US3] Create `CredencialListItem`/`CrearCredencialRequest` DTOs in `SsoAdmin.Application/Features/GestionCredenciales/CredencialDtos.cs`
-- [ ] T053 [P] [US3] Create `CrearCredencialValidator` in `SsoAdmin.Application/Features/GestionCredenciales/CrearCredencialValidator.cs`
-- [ ] T054 [US3] Implement `ListarCredencialesHandler`, `CrearCredencialHandler` (maps the unique-index violation from `CredencialRepository` to a `400` domain error), `EliminarCredencialHandler` in `SsoAdmin.Application/Features/GestionCredenciales/CredencialHandlers.cs` (depends on T020, T052, T053)
-- [ ] T055 [US3] Create `CredencialesController` (`GET`/`POST`/`DELETE /api/credenciales`) with `[Authorize]` in `SsoAdmin.Web/Controllers/CredencialesController.cs` (depends on T054)
-- [ ] T056 [P] [US3] Create Credenciales Razor pages (listar/crear/eliminar) and `wwwroot/js/credenciales.js` in `SsoAdmin.Web/Pages/Credenciales/`
+- [X] T052 [US3] Create `CredencialListItem`/`CrearCredencialRequest` DTOs in `SsoAdmin.Application/Features/GestionCredenciales/CredencialDtos.cs`
+- [X] T053 [P] [US3] Create `CrearCredencialValidator` in `SsoAdmin.Application/Features/GestionCredenciales/CrearCredencialValidator.cs`
+- [X] T054 [US3] Implement `ListarCredencialesHandler`, `CrearCredencialHandler` (maps the unique-index violation from `CredencialRepository` to a `400` domain error), `EliminarCredencialHandler` in `SsoAdmin.Application/Features/GestionCredenciales/CredencialHandlers.cs` (depends on T020, T052, T053)
+- [X] T055 [US3] Create `CredencialesController` (`GET`/`POST`/`DELETE /api/credenciales`) with `[Authorize]` in `SsoAdmin.Web/Controllers/CredencialesController.cs` (depends on T054)
+- [X] T056 [P] [US3] Create Credenciales Razor pages (listar/crear/eliminar) and `wwwroot/js/credenciales.js` in `SsoAdmin.Web/Pages/Credenciales/`
 
 **Checkpoint**: User Stories 1, 2, and 3 all work independently.
 

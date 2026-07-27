@@ -1,0 +1,40 @@
+@page
+@model SsoAdmin.Web.Pages.Credenciales.IndexModel
+@{
+    ViewData["Title"] = "Credenciales";
+}
+
+<h1 class="h3 mb-4">Credenciales</h1>
+
+<form id="crear-credencial-form" class="row g-2 mb-4">
+    <div class="col-auto">
+        <select class="form-select" id="usuario-select" required></select>
+    </div>
+    <div class="col-auto">
+        <input type="text" class="form-control" id="username" placeholder="username" required />
+    </div>
+    <div class="col-auto">
+        <input type="text" class="form-control" id="emisor" placeholder="emisor" required />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Crear credencial</button>
+    </div>
+</form>
+
+<div id="credencial-error" class="alert alert-danger d-none" role="alert"></div>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Username</th>
+            <th>Emisor</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="credenciales-tbody"></tbody>
+</table>
+
+@section Scripts {
+    <script src="~/js/credenciales.js" asp-append-version="true"></script>
+}
