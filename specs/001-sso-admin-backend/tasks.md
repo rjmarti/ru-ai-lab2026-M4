@@ -112,23 +112,23 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T036 [P] [US2] Integration tests for `POST /api/auth/login`/`logout` — valid credentials issue a cookie (AC1), invalid credentials return 401 (AC2) — in `SsoAdmin.Test/Integration/AuthControllerTests.cs` (depends on T026, Web fixture)
-- [ ] T037 [P] [US2] Integration tests for `/api/usuarios` listar/crear/editar/baja, including the cascade of active permisos on baja and idempotent baja on an already-inactive usuario (AC3, AC4, FR-006, edge case) in `SsoAdmin.Test/Integration/UsuariosControllerTests.cs` (depends on T026, Web fixture)
-- [ ] T038 [P] [US2] Unit test asserting `DarBajaUsuarioHandler` expires every active `PermisoAcceso` for the usuario within the same operation in `SsoAdmin.Test/Unit/DarBajaUsuarioHandlerTests.cs`
+- [X] T036 [P] [US2] Integration tests for `POST /api/auth/login`/`logout` — valid credentials issue a cookie (AC1), invalid credentials return 401 (AC2) — in `SsoAdmin.Test/Integration/AuthControllerTests.cs` (depends on T026, Web fixture)
+- [X] T037 [P] [US2] Integration tests for `/api/usuarios` listar/crear/editar/baja, including the cascade of active permisos on baja and idempotent baja on an already-inactive usuario (AC3, AC4, FR-006, edge case) in `SsoAdmin.Test/Integration/UsuariosControllerTests.cs` (depends on T026, Web fixture)
+- [X] T038 [P] [US2] Unit test asserting `DarBajaUsuarioHandler` expires every active `PermisoAcceso` for the usuario within the same operation in `SsoAdmin.Test/Unit/DarBajaUsuarioHandlerTests.cs`
 
 ### Implementation for User Story 2
 
-- [ ] T039 [US2] Create `LoginRequest`/`LoginResponse` DTOs + `LoginValidator` in `SsoAdmin.Application/Features/AuthSI/AuthDtos.cs`
-- [ ] T040 [US2] Implement `LoginHandler` validating against `LoginSI` via `PasswordHasher<T>` in `SsoAdmin.Application/Features/AuthSI/LoginHandler.cs` (depends on T023, T039)
-- [ ] T041 [US2] Create `AuthController` with `POST /api/auth/login` (cookie sign-in) and `POST /api/auth/logout` in `SsoAdmin.Web/Controllers/AuthController.cs` (depends on T040)
-- [ ] T042 [P] [US2] Configure cookie authentication scheme (login path, cookie name/expiry) in `SsoAdmin.Web/Program.cs` (depends on T025)
-- [ ] T043 [US2] Create `UsuarioListItem`/`CrearUsuarioRequest`/`EditarUsuarioRequest` DTOs in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioDtos.cs`
-- [ ] T044 [P] [US2] Create `CrearUsuarioValidator`/`EditarUsuarioValidator` (nombre no vacío) in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioValidators.cs`
-- [ ] T045 [US2] Implement `ListarUsuariosHandler`, `CrearUsuarioHandler`, `EditarUsuarioHandler` in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioHandlers.cs` (depends on T019, T043, T044)
-- [ ] T046 [US2] Implement `DarBajaUsuarioHandler` — sets `Activo=false` and, in the same transaction, sets `FechaHasta=hoy` on every active `PermisoAcceso` of the usuario; idempotent when already inactive (FR-006/FR-015) in `SsoAdmin.Application/Features/GestionUsuarios/DarBajaUsuarioHandler.cs` (depends on T019, T022)
-- [ ] T047 [US2] Create `UsuariosController` (`GET`/`POST`/`PUT /api/usuarios`, `POST /api/usuarios/{id}/baja`) with `[Authorize]` cookie auth in `SsoAdmin.Web/Controllers/UsuariosController.cs` (depends on T045, T046)
-- [ ] T048 [P] [US2] Create `Login.cshtml`/`Login.cshtml.cs` page posting to `/api/auth/login` in `SsoAdmin.Web/Pages/Login.cshtml`
-- [ ] T049 [P] [US2] Create Usuarios Razor pages (listar/crear/editar/baja) and `wwwroot/js/usuarios.js` fetch calls against `/api/usuarios` in `SsoAdmin.Web/Pages/Usuarios/`
+- [X] T039 [US2] Create `LoginRequest`/`LoginResponse` DTOs + `LoginValidator` in `SsoAdmin.Application/Features/AuthSI/AuthDtos.cs`
+- [X] T040 [US2] Implement `LoginHandler` validating against `LoginSI` via `PasswordHasher<T>` in `SsoAdmin.Application/Features/AuthSI/LoginHandler.cs` (depends on T023, T039)
+- [X] T041 [US2] Create `AuthController` with `POST /api/auth/login` (cookie sign-in) and `POST /api/auth/logout` in `SsoAdmin.Web/Controllers/AuthController.cs` (depends on T040)
+- [X] T042 [P] [US2] Configure cookie authentication scheme (login path, cookie name/expiry) in `SsoAdmin.Web/Program.cs` (depends on T025)
+- [X] T043 [US2] Create `UsuarioListItem`/`CrearUsuarioRequest`/`EditarUsuarioRequest` DTOs in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioDtos.cs`
+- [X] T044 [P] [US2] Create `CrearUsuarioValidator`/`EditarUsuarioValidator` (nombre no vacío) in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioValidators.cs`
+- [X] T045 [US2] Implement `ListarUsuariosHandler`, `CrearUsuarioHandler`, `EditarUsuarioHandler` in `SsoAdmin.Application/Features/GestionUsuarios/UsuarioHandlers.cs` (depends on T019, T043, T044)
+- [X] T046 [US2] Implement `DarBajaUsuarioHandler` — sets `Activo=false` and, in the same transaction, sets `FechaHasta=hoy` on every active `PermisoAcceso` of the usuario; idempotent when already inactive (FR-006/FR-015) in `SsoAdmin.Application/Features/GestionUsuarios/DarBajaUsuarioHandler.cs` (depends on T019, T022)
+- [X] T047 [US2] Create `UsuariosController` (`GET`/`POST`/`PUT /api/usuarios`, `POST /api/usuarios/{id}/baja`) with `[Authorize]` cookie auth in `SsoAdmin.Web/Controllers/UsuariosController.cs` (depends on T045, T046)
+- [X] T048 [P] [US2] Create `Login.cshtml`/`Login.cshtml.cs` page posting to `/api/auth/login` in `SsoAdmin.Web/Pages/Login.cshtml`
+- [X] T049 [P] [US2] Create Usuarios Razor pages (listar/crear/editar/baja) and `wwwroot/js/usuarios.js` fetch calls against `/api/usuarios` in `SsoAdmin.Web/Pages/Usuarios/`
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 

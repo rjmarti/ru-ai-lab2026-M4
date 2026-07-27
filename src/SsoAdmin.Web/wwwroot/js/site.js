@@ -1,4 +1,12 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+// Comportamiento común del sitio de administración.
+(function () {
+    "use strict";
 
-// Write your JavaScript code.
+    const logoutButton = document.getElementById("logout-btn");
+    if (logoutButton) {
+        logoutButton.addEventListener("click", async function () {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/Login";
+        });
+    }
+})();

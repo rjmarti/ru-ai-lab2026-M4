@@ -1,0 +1,31 @@
+@page
+@model SsoAdmin.Web.Pages.Usuarios.IndexModel
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<h1 class="h3 mb-4">Usuarios</h1>
+
+<form id="crear-usuario-form" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input type="text" class="form-control" id="nuevo-nombre" placeholder="Nombre del usuario" required />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Crear usuario</button>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="usuarios-tbody"></tbody>
+</table>
+
+@section Scripts {
+    <script src="~/js/usuarios.js" asp-append-version="true"></script>
+}
