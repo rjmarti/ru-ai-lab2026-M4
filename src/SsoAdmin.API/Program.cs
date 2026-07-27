@@ -1,23 +1,41 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using SsoAdmin.Data;
 
-// Add services to the container.
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Cadena de conexión externalizada (Principio II).
+string connectionString = builder.Configuration.GetConnectionString("Default") ?? string.Empty;
+builder.Services.AddSsoAdminData(connectionString);
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Bajo un proveedor relacional no-SqlServer (SQLite en tests) se crea el esquema; en
+// producción el esquema de SQL Server lo gestionan SsoAdmin.Web y la CLI de EF Core.
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    SsoAdminDbContext context = scope.ServiceProvider.GetRequiredService<SsoAdminDbContext>();
+    if (context.Database.IsRelational() && !context.Database.IsSqlServer())
+    {
+        await context.Database.EnsureCreatedAsync();
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+
+/// <summary>Punto de entrada de la API; expuesto como parcial para los tests de integración.</summary>
+public partial class Program
+{
+}

@@ -53,28 +53,28 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Create `Usuario` entity (`Id`, `Nombre`, `Activo`) in `SsoAdmin.Models/Usuario.cs`
-- [ ] T006 [P] Create `Credencial` entity (`Id`, `UsuarioId`, `Username`, `Emisor`) in `SsoAdmin.Models/Credencial.cs`
-- [ ] T007 [P] Create `Aplicacion` entity (`Id`, `Nombre`, `Url`) in `SsoAdmin.Models/Aplicacion.cs`
-- [ ] T008 [P] Create `PermisoAcceso` entity (`Id`, `UsuarioId`, `AplicacionId`, `FechaDesde`, `FechaHasta?`) in `SsoAdmin.Models/PermisoAcceso.cs`
-- [ ] T009 [P] Create `LoginSI` entity (`Id`, `Usuario`, `PasswordHash`) in `SsoAdmin.Models/LoginSI.cs`
-- [ ] T010 Create `SsoAdminDbContext` with `DbSet<T>` for all five entities in `SsoAdmin.Data/SsoAdminDbContext.cs` (depends on T005-T009)
-- [ ] T011 [P] Create `UsuarioConfiguration : IEntityTypeConfiguration<Usuario>` in `SsoAdmin.Data/Configurations/UsuarioConfiguration.cs` (depends on T010)
-- [ ] T012 [P] Create `CredencialConfiguration` with unique composite index `(Username, Emisor)` in `SsoAdmin.Data/Configurations/CredencialConfiguration.cs` — enforces FR-001/FR-002 at the database level (depends on T010)
-- [ ] T013 [P] Create `AplicacionConfiguration` in `SsoAdmin.Data/Configurations/AplicacionConfiguration.cs` (depends on T010)
-- [ ] T014 [P] Create `PermisoAccesoConfiguration` with FKs to `Usuario`/`Aplicacion` and a supporting index on `(UsuarioId, AplicacionId)` in `SsoAdmin.Data/Configurations/PermisoAccesoConfiguration.cs` (depends on T010)
-- [ ] T015 [P] Create `LoginSIConfiguration` with unique index on `Usuario` in `SsoAdmin.Data/Configurations/LoginSIConfiguration.cs` (depends on T010)
-- [ ] T016 Generate initial EF Core migration `InitialCreate` in `SsoAdmin.Data/Migrations/` (depends on T011-T015)
-- [ ] T017 Implement `LoginSISeeder` that precargas `admin`/`admin` via `PasswordHasher<T>` on first run (FR-007) in `SsoAdmin.Data/Seed/LoginSISeeder.cs` (depends on T010, T015)
-- [ ] T018 [P] Create shared `Result<T>`/`DomainError` types for handler outcomes in `SsoAdmin.Application/Common/Result.cs`
-- [ ] T019 [P] Create `IUsuarioRepository` + `UsuarioRepository` in `SsoAdmin.Data/Repositories/UsuarioRepository.cs` (depends on T010)
-- [ ] T020 [P] Create `ICredencialRepository` + `CredencialRepository`, translating unique-index `DbUpdateException` into a domain conflict result, in `SsoAdmin.Data/Repositories/CredencialRepository.cs` (depends on T010, T012)
-- [ ] T021 [P] Create `IAplicacionRepository` + `AplicacionRepository` in `SsoAdmin.Data/Repositories/AplicacionRepository.cs` (depends on T010)
-- [ ] T022 [P] Create `IPermisoAccesoRepository` + `PermisoAccesoRepository`, with an overlap-check query executed inside a `Serializable` transaction, in `SsoAdmin.Data/Repositories/PermisoAccesoRepository.cs` (depends on T010, T014)
-- [ ] T023 [P] Create `ILoginSIRepository` + `LoginSIRepository` in `SsoAdmin.Data/Repositories/LoginSIRepository.cs` (depends on T010)
-- [ ] T024 Configure `SsoAdmin.API/Program.cs`: `DbContext` registration via `IConfiguration`, DI registration of the repositories used by `VerificarAcceso`, `SsoController` routing, ApiKey scheme, Swashbuckle/OpenAPI for the sso-verificar contract only (depends on T016, T019-T023)
-- [ ] T025 Configure `SsoAdmin.Web/Program.cs`: `DbContext` registration, DI registration of all repositories, cookie authentication scheme, MVC controllers (internal admin API) + Razor Pages, static files (depends on T016, T019-T023)
-- [ ] T026 [P] Create `WebApplicationFactory`-based test fixtures using the SQLite relational provider (not `InMemory`) for `SsoAdmin.API` and `SsoAdmin.Web` in `SsoAdmin.Test/TestFixtures/` (depends on T024, T025)
+- [X] T005 [P] Create `Usuario` entity (`Id`, `Nombre`, `Activo`) in `SsoAdmin.Models/Usuario.cs`
+- [X] T006 [P] Create `Credencial` entity (`Id`, `UsuarioId`, `Username`, `Emisor`) in `SsoAdmin.Models/Credencial.cs`
+- [X] T007 [P] Create `Aplicacion` entity (`Id`, `Nombre`, `Url`) in `SsoAdmin.Models/Aplicacion.cs`
+- [X] T008 [P] Create `PermisoAcceso` entity (`Id`, `UsuarioId`, `AplicacionId`, `FechaDesde`, `FechaHasta?`) in `SsoAdmin.Models/PermisoAcceso.cs`
+- [X] T009 [P] Create `LoginSI` entity (`Id`, `Usuario`, `PasswordHash`) in `SsoAdmin.Models/LoginSI.cs`
+- [X] T010 Create `SsoAdminDbContext` with `DbSet<T>` for all five entities in `SsoAdmin.Data/SsoAdminDbContext.cs` (depends on T005-T009)
+- [X] T011 [P] Create `UsuarioConfiguration : IEntityTypeConfiguration<Usuario>` in `SsoAdmin.Data/Configurations/UsuarioConfiguration.cs` (depends on T010)
+- [X] T012 [P] Create `CredencialConfiguration` with unique composite index `(Username, Emisor)` in `SsoAdmin.Data/Configurations/CredencialConfiguration.cs` — enforces FR-001/FR-002 at the database level (depends on T010)
+- [X] T013 [P] Create `AplicacionConfiguration` in `SsoAdmin.Data/Configurations/AplicacionConfiguration.cs` (depends on T010)
+- [X] T014 [P] Create `PermisoAccesoConfiguration` with FKs to `Usuario`/`Aplicacion` and a supporting index on `(UsuarioId, AplicacionId)` in `SsoAdmin.Data/Configurations/PermisoAccesoConfiguration.cs` (depends on T010)
+- [X] T015 [P] Create `LoginSIConfiguration` with unique index on `Usuario` in `SsoAdmin.Data/Configurations/LoginSIConfiguration.cs` (depends on T010)
+- [X] T016 Generate initial EF Core migration `InitialCreate` in `SsoAdmin.Data/Migrations/` (depends on T011-T015)
+- [X] T017 Implement `LoginSISeeder` that precargas `admin`/`admin` via `PasswordHasher<T>` on first run (FR-007) in `SsoAdmin.Data/Seed/LoginSISeeder.cs` (depends on T010, T015)
+- [X] T018 [P] Create shared `Result<T>`/`DomainError` types for handler outcomes in `SsoAdmin.Application/Common/Result.cs`
+- [X] T019 [P] Create `IUsuarioRepository` + `UsuarioRepository` in `SsoAdmin.Data/Repositories/UsuarioRepository.cs` (depends on T010)
+- [X] T020 [P] Create `ICredencialRepository` + `CredencialRepository`, translating unique-index `DbUpdateException` into a domain conflict result, in `SsoAdmin.Data/Repositories/CredencialRepository.cs` (depends on T010, T012)
+- [X] T021 [P] Create `IAplicacionRepository` + `AplicacionRepository` in `SsoAdmin.Data/Repositories/AplicacionRepository.cs` (depends on T010)
+- [X] T022 [P] Create `IPermisoAccesoRepository` + `PermisoAccesoRepository`, with an overlap-check query executed inside a `Serializable` transaction, in `SsoAdmin.Data/Repositories/PermisoAccesoRepository.cs` (depends on T010, T014)
+- [X] T023 [P] Create `ILoginSIRepository` + `LoginSIRepository` in `SsoAdmin.Data/Repositories/LoginSIRepository.cs` (depends on T010)
+- [X] T024 Configure `SsoAdmin.API/Program.cs`: `DbContext` registration via `IConfiguration`, DI registration of the repositories used by `VerificarAcceso`, `SsoController` routing, ApiKey scheme, Swashbuckle/OpenAPI for the sso-verificar contract only (depends on T016, T019-T023)
+- [X] T025 Configure `SsoAdmin.Web/Program.cs`: `DbContext` registration, DI registration of all repositories, cookie authentication scheme, MVC controllers (internal admin API) + Razor Pages, static files (depends on T016, T019-T023)
+- [X] T026 [P] Create `WebApplicationFactory`-based test fixtures using the SQLite relational provider (not `InMemory`) for `SsoAdmin.API` and `SsoAdmin.Web` in `SsoAdmin.Test/TestFixtures/` (depends on T024, T025)
 
 **Checkpoint**: `dotnet build` succeeds across the solution; `dotnet ef database update` applies `InitialCreate`; both hosts start; test fixtures can spin up an in-memory SQLite-backed host. User story implementation can now begin.
 
