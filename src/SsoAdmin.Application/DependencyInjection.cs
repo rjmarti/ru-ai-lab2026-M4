@@ -1,7 +1,9 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SsoAdmin.Application.Features.AuthSI;
+using SsoAdmin.Application.Features.GestionAplicaciones;
 using SsoAdmin.Application.Features.GestionCredenciales;
+using SsoAdmin.Application.Features.GestionPermisos;
 using SsoAdmin.Application.Features.GestionUsuarios;
 using SsoAdmin.Application.Features.VerificarAcceso;
 
@@ -37,6 +39,18 @@ public static class DependencyInjection
         services.AddScoped<ListarCredencialesHandler>();
         services.AddScoped<CrearCredencialHandler>();
         services.AddScoped<EliminarCredencialHandler>();
+
+        // US4 — Gestión de aplicaciones y permisos.
+        services.AddScoped<IValidator<CrearAplicacionRequest>, CrearAplicacionValidator>();
+        services.AddScoped<IValidator<EditarAplicacionRequest>, EditarAplicacionValidator>();
+        services.AddScoped<ListarAplicacionesHandler>();
+        services.AddScoped<CrearAplicacionHandler>();
+        services.AddScoped<EditarAplicacionHandler>();
+        services.AddScoped<EliminarAplicacionHandler>();
+        services.AddScoped<IValidator<OtorgarPermisoRequest>, OtorgarPermisoValidator>();
+        services.AddScoped<OtorgarPermisoHandler>();
+        services.AddScoped<ListarPermisosHandler>();
+        services.AddScoped<RevocarPermisoHandler>();
 
         return services;
     }

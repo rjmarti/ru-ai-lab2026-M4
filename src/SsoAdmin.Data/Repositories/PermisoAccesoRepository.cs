@@ -86,18 +86,23 @@ public class PermisoAccesoRepository : IPermisoAccesoRepository
         await using IDbContextTransaction transaccion =
             await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-        List<PermisoAcceso> existentes = await _context.Permisos
-            .Where(p => p.UsuarioId == permiso.UsuarioId && p.AplicacionId == permiso.AplicacionId)
+        // Se inserta primero (tomando el lock de escritura) y luego se verifica el solapamiento
+        // contra los demás períodos. Así dos otorgamientos concurrentes se serializan a nivel de
+        // motor: el segundo solo evalúa el solapamiento una vez que el primero confirmó su fila.
+        await _context.Permisos.AddAsync(permiso, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        List<PermisoAcceso> otros = await _context.Permisos
+            .Where(p => p.UsuarioId == permiso.UsuarioId && p.AplicacionId == permiso.AplicacionId && p.Id != permiso.Id)
             .ToListAsync(cancellationToken);
 
-        if (existentes.Any(e => IPermisoAccesoRepository.SeSolapan(permiso, e)))
+        if (otros.Any(o => IPermisoAccesoRepository.SeSolapan(permiso, o)))
         {
             await transaccion.RollbackAsync(cancellationToken);
+            _context.Entry(permiso).State = EntityState.Detached;
             return ResultadoOtorgarPermiso.Solapado;
         }
 
-        await _context.Permisos.AddAsync(permiso, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
         await transaccion.CommitAsync(cancellationToken);
         return ResultadoOtorgarPermiso.Otorgado;
     }

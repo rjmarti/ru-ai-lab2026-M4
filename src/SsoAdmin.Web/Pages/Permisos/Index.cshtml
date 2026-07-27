@@ -1,0 +1,44 @@
+@page
+@model SsoAdmin.Web.Pages.Permisos.IndexModel
+@{
+    ViewData["Title"] = "Permisos";
+}
+
+<h1 class="h3 mb-4">Permisos de acceso</h1>
+
+<form id="otorgar-permiso-form" class="row g-2 mb-4">
+    <div class="col-auto">
+        <select class="form-select" id="usuario-select" required></select>
+    </div>
+    <div class="col-auto">
+        <select class="form-select" id="aplicacion-select" required></select>
+    </div>
+    <div class="col-auto">
+        <input type="date" class="form-control" id="fecha-desde" required />
+    </div>
+    <div class="col-auto">
+        <input type="date" class="form-control" id="fecha-hasta" placeholder="opcional" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Otorgar permiso</button>
+    </div>
+</form>
+
+<div id="permiso-error" class="alert alert-danger d-none" role="alert"></div>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Aplicación</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="permisos-tbody"></tbody>
+</table>
+
+@section Scripts {
+    <script src="~/js/permisos.js" asp-append-version="true"></script>
+}

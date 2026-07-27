@@ -165,23 +165,23 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T057 [P] [US4] Integration tests for `/api/aplicaciones`: empty-URL registration/edit → 400 (AC1), listar/crear/editar/eliminar (AC4) in `SsoAdmin.Test/Integration/AplicacionesControllerTests.cs` (depends on T026, Web fixture)
-- [ ] T058 [P] [US4] Integration tests for `/api/permisos`: overlapping period → 409 (AC2, incl. exact-date-match and pre-existing indefinite-permiso edge cases), `fecha_desde > fecha_hasta` → 400 (edge case), revoke sets `fecha_hasta=hoy` and a subsequent SSO query returns `permiso_vencido` (AC3) in `SsoAdmin.Test/Integration/PermisosControllerTests.cs` (depends on T026, Web fixture)
-- [ ] T059 [P] [US4] Integration test firing two concurrent `POST /api/permisos` requests with overlapping periods for the same usuario+aplicación and asserting exactly one persists (edge case, FR-004, `Serializable` isolation) in `SsoAdmin.Test/Integration/PermisoConcurrencyTests.cs` (depends on T026, Web fixture)
-- [ ] T060 [P] [US4] Integration test deleting an aplicación with active permisos and confirming a subsequent SSO query returns `motivo=aplicacion_no_encontrada` (edge case) in `SsoAdmin.Test/Integration/AplicacionEliminacionTests.cs` (depends on T026, Web fixture for the deletion + API fixture for the SSO follow-up query)
+- [X] T057 [P] [US4] Integration tests for `/api/aplicaciones`: empty-URL registration/edit → 400 (AC1), listar/crear/editar/eliminar (AC4) in `SsoAdmin.Test/Integration/AplicacionesControllerTests.cs` (depends on T026, Web fixture)
+- [X] T058 [P] [US4] Integration tests for `/api/permisos`: overlapping period → 409 (AC2, incl. exact-date-match and pre-existing indefinite-permiso edge cases), `fecha_desde > fecha_hasta` → 400 (edge case), revoke sets `fecha_hasta=hoy` and a subsequent SSO query returns `permiso_vencido` (AC3) in `SsoAdmin.Test/Integration/PermisosControllerTests.cs` (depends on T026, Web fixture)
+- [X] T059 [P] [US4] Integration test firing two concurrent `POST /api/permisos` requests with overlapping periods for the same usuario+aplicación and asserting exactly one persists (edge case, FR-004, `Serializable` isolation) in `SsoAdmin.Test/Integration/PermisoConcurrencyTests.cs` (depends on T026, Web fixture)
+- [X] T060 [P] [US4] Integration test deleting an aplicación with active permisos and confirming a subsequent SSO query returns `motivo=aplicacion_no_encontrada` (edge case) in `SsoAdmin.Test/Integration/AplicacionEliminacionTests.cs` (depends on T026, Web fixture for the deletion + API fixture for the SSO follow-up query)
 
 ### Implementation for User Story 4
 
-- [ ] T061 [US4] Create `AplicacionListItem`/`CrearAplicacionRequest`/`EditarAplicacionRequest` DTOs + validator (URL no vacía, FR-003) in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionDtos.cs`
-- [ ] T062 [US4] Implement `ListarAplicacionesHandler`, `CrearAplicacionHandler`, `EditarAplicacionHandler`, `EliminarAplicacionHandler` in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionHandlers.cs` (depends on T021, T061)
-- [ ] T063 [US4] Create `AplicacionesController` (`GET`/`POST`/`PUT`/`DELETE /api/aplicaciones`) with `[Authorize]` in `SsoAdmin.Web/Controllers/AplicacionesController.cs` (depends on T062)
-- [ ] T064 [US4] Create `PermisoListItem`/`OtorgarPermisoRequest` DTOs in `SsoAdmin.Application/Features/GestionPermisos/PermisoDtos.cs`
-- [ ] T065 [P] [US4] Create `OtorgarPermisoValidator` (`fecha_desde <= fecha_hasta` when present) in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoValidator.cs`
-- [ ] T066 [US4] Implement `OtorgarPermisoHandler` running the overlap check (incl. exact-match and open-ended-permiso edge cases) inside the `Serializable` transaction from `PermisoAccesoRepository` in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoHandler.cs` (depends on T022, T064, T065)
-- [ ] T067 [US4] Implement `ListarPermisosHandler` (optional `usuarioId`/`aplicacionId` filters) and `RevocarPermisoHandler` (sets `FechaHasta=hoy`, idempotent) in `SsoAdmin.Application/Features/GestionPermisos/PermisoHandlers.cs` (depends on T022, T064)
-- [ ] T068 [US4] Create `PermisosController` (`GET /api/permisos`, `POST /api/permisos`, `POST /api/permisos/{id}/revocar`) with `[Authorize]` in `SsoAdmin.Web/Controllers/PermisosController.cs` (depends on T066, T067)
-- [ ] T069 [P] [US4] Create Aplicaciones Razor pages (listar/crear/editar/eliminar) and `wwwroot/js/aplicaciones.js` in `SsoAdmin.Web/Pages/Aplicaciones/`
-- [ ] T070 [P] [US4] Create Permisos Razor pages (listar/otorgar/revocar) and `wwwroot/js/permisos.js` in `SsoAdmin.Web/Pages/Permisos/`
+- [X] T061 [US4] Create `AplicacionListItem`/`CrearAplicacionRequest`/`EditarAplicacionRequest` DTOs + validator (URL no vacía, FR-003) in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionDtos.cs`
+- [X] T062 [US4] Implement `ListarAplicacionesHandler`, `CrearAplicacionHandler`, `EditarAplicacionHandler`, `EliminarAplicacionHandler` in `SsoAdmin.Application/Features/GestionAplicaciones/AplicacionHandlers.cs` (depends on T021, T061)
+- [X] T063 [US4] Create `AplicacionesController` (`GET`/`POST`/`PUT`/`DELETE /api/aplicaciones`) with `[Authorize]` in `SsoAdmin.Web/Controllers/AplicacionesController.cs` (depends on T062)
+- [X] T064 [US4] Create `PermisoListItem`/`OtorgarPermisoRequest` DTOs in `SsoAdmin.Application/Features/GestionPermisos/PermisoDtos.cs`
+- [X] T065 [P] [US4] Create `OtorgarPermisoValidator` (`fecha_desde <= fecha_hasta` when present) in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoValidator.cs`
+- [X] T066 [US4] Implement `OtorgarPermisoHandler` running the overlap check (incl. exact-match and open-ended-permiso edge cases) inside the `Serializable` transaction from `PermisoAccesoRepository` in `SsoAdmin.Application/Features/GestionPermisos/OtorgarPermisoHandler.cs` (depends on T022, T064, T065)
+- [X] T067 [US4] Implement `ListarPermisosHandler` (optional `usuarioId`/`aplicacionId` filters) and `RevocarPermisoHandler` (sets `FechaHasta=hoy`, idempotent) in `SsoAdmin.Application/Features/GestionPermisos/PermisoHandlers.cs` (depends on T022, T064)
+- [X] T068 [US4] Create `PermisosController` (`GET /api/permisos`, `POST /api/permisos`, `POST /api/permisos/{id}/revocar`) with `[Authorize]` in `SsoAdmin.Web/Controllers/PermisosController.cs` (depends on T066, T067)
+- [X] T069 [P] [US4] Create Aplicaciones Razor pages (listar/crear/editar/eliminar) and `wwwroot/js/aplicaciones.js` in `SsoAdmin.Web/Pages/Aplicaciones/`
+- [X] T070 [P] [US4] Create Permisos Razor pages (listar/otorgar/revocar) and `wwwroot/js/permisos.js` in `SsoAdmin.Web/Pages/Permisos/`
 
 **Checkpoint**: All four user stories are independently functional.
 
