@@ -191,12 +191,12 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 **Purpose**: Performance validation, contract/documentation cross-check, and constitution compliance sweep
 
-- [ ] T071 [P] Verify Swashbuckle/OpenAPI output in `SsoAdmin.API/Program.cs` documents every endpoint consistent with `contracts/sso-verificar.md` and `contracts/admin-api.md`
-- [ ] T072 [P] Performance test seeding 100 aplicaciones / 3000 usuarios and asserting `POST /api/sso/verificar` responds in <500ms (FR-014/SC-001) in `SsoAdmin.Test/Integration/SsoVerificarPerformanceTests.cs`
-- [ ] T073 [P] Performance test asserting baja lógica of a usuario with permisos across multiple aplicaciones expires all of them in <3s (FR-015/SC-002) in `SsoAdmin.Test/Integration/BajaUsuarioPerformanceTests.cs`
-- [ ] T074 [P] Constitution compliance sweep: confirm `ILogger<T>` is used everywhere (no `Console.WriteLine`), no `.Result`/`.Wait()` blocking calls, and `SsoAdmin.API` responses never expose `SsoAdmin.Models` entities directly
-- [ ] T075 Run the full `quickstart.md` validation end-to-end (`dotnet restore && dotnet build && dotnet test`, then the manual Web + SSO curl flow) and confirm every step passes
-- [ ] T076 [P] Timed walkthrough asserting SC-007: script or manual-QA checklist (tied to `quickstart.md` §5) driving the full onboarding cycle — crear usuario → crear credencial → otorgar permiso — through `SsoAdmin.Web`, asserting completion in under 2 minutes, in `SsoAdmin.Test/Integration/OnboardingTimingTests.cs` (or a documented manual-QA step if UI-timing automation is out of scope)
+- [X] T071 [P] Verify Swashbuckle/OpenAPI output in `SsoAdmin.API/Program.cs` documents every endpoint consistent with `contracts/sso-verificar.md` and `contracts/admin-api.md`
+- [X] T072 [P] Performance test seeding 100 aplicaciones / 3000 usuarios and asserting `POST /api/sso/verificar` responds in <500ms (FR-014/SC-001) in `SsoAdmin.Test/Integration/SsoVerificarPerformanceTests.cs`
+- [X] T073 [P] Performance test asserting baja lógica of a usuario with permisos across multiple aplicaciones expires all of them in <3s (FR-015/SC-002) in `SsoAdmin.Test/Integration/BajaUsuarioPerformanceTests.cs`
+- [X] T074 [P] Constitution compliance sweep: confirm `ILogger<T>` is used everywhere (no `Console.WriteLine`), no `.Result`/`.Wait()` blocking calls, and `SsoAdmin.API` responses never expose `SsoAdmin.Models` entities directly
+- [X] T075 Run the full `quickstart.md` validation end-to-end (`dotnet restore && dotnet build && dotnet test`, then the manual Web + SSO curl flow) and confirm every step passes
+- [X] T076 [P] Timed walkthrough asserting SC-007: script or manual-QA checklist (tied to `quickstart.md` §5) driving the full onboarding cycle — crear usuario → crear credencial → otorgar permiso — through `SsoAdmin.Web`, asserting completion in under 2 minutes, in `SsoAdmin.Test/Integration/OnboardingTimingTests.cs` (or a documented manual-QA step if UI-timing automation is out of scope)
 
 ---
 

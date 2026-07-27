@@ -43,10 +43,9 @@ app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
     await context.Response.WriteAsJsonAsync(new { error = "internal_error" });
 }));
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// Documento OpenAPI del contrato SSO (research.md #9). Expuesto en todos los ambientes por
+// ser una API de máquina cuyo contrato deben poder inspeccionar el SSO externo y SI.
+app.MapOpenApi();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
