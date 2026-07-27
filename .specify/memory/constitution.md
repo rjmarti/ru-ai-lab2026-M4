@@ -1,20 +1,18 @@
 <!--
 Sync Impact Report
-- Version change: [TEMPLATE] → 1.0.0 (initial ratification)
-- Modified principles: N/A (first concrete adoption; all placeholders replaced)
-- Added sections:
-  - Core Principles: I. Database-Sourced Truth (No Data Fabrication)
-  - Core Principles: II. No Hardcoded Secrets — Externalized Configuration
-  - Core Principles: III. Verifiable Acceptance Criteria (NON-NEGOTIABLE)
-  - Security & Configuration Standards
-  - Development Workflow & Quality Gates
-  - Governance
-- Removed sections: none (template placeholders only)
+- Version change: 1.0.0 → 1.0.1 (PATCH: clarify quality-gate working directory)
+- Modified principles: none renamed or redefined
+- Modified sections:
+  - Development Workflow & Quality Gates: `dotnet restore/build/test` now run from `./src`
+    (where the `.sln` resides) instead of "the project root", aligning with the AGENTS.md
+    decision to generate all solution code and the solution file under `./src`.
+- Added sections: none
+- Removed sections: none
 - Templates requiring updates:
   - ✅ .specify/templates/plan-template.md (generic "Constitution Check" gate references this file; no edits required)
-  - ✅ .specify/templates/spec-template.md (Functional Requirements / Success Criteria sections already support acceptance-criteria-to-test traceability; no edits required)
-  - ✅ .specify/templates/tasks-template.md (test tasks already templated per user story; no edits required — note tests are no longer optional under Principle III for any user story that defines acceptance scenarios)
-  - ✅ AGENTS.md (already enforces no hardcoded secrets / ILogger / DTO boundaries; consistent with this constitution, no edits required)
+  - ✅ .specify/templates/spec-template.md (no structural impact; no edits required)
+  - ✅ .specify/templates/tasks-template.md (no structural impact; no edits required)
+  - ✅ AGENTS.md (source of the `./src` decision; already consistent — this amendment aligns to it)
   - N/A .specify/templates/commands/*.md (directory does not exist in this project)
 - Follow-up TODOs: none
 -->
@@ -83,8 +81,9 @@ assertion.
 - Every feature specification's acceptance scenarios and functional/success criteria MUST be
   mapped to test cases in `[NombreProyecto].Test` before the feature is considered complete
   (see Principle III).
-- Before declaring any task complete, the following MUST be run from the project root and
-  MUST pass: `dotnet restore`, `dotnet build`, `dotnet test`.
+- Before declaring any task complete, the following MUST be run from the `./src` directory
+  (where the solution `.sln` resides, per AGENTS.md) and MUST pass: `dotnet restore`,
+  `dotnet build`, `dotnet test`.
 - Code review (self- or peer-) MUST explicitly check for: (a) any data path that could
   return non-database-sourced values, (b) any literal secret, path, URL, or internal
   parameter that should be externalized, and (c) any acceptance criterion lacking test
@@ -111,4 +110,4 @@ result, and those updates MUST land in the same PR or an immediately-following o
 above. Any deviation MUST be justified explicitly in the PR description and, if it recurs,
 raised as a proposed amendment rather than repeatedly waived.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-17 | **Last Amended**: 2026-07-17
+**Version**: 1.0.1 | **Ratified**: 2026-07-17 | **Last Amended**: 2026-07-27

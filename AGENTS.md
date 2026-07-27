@@ -20,13 +20,15 @@ Este proyecto es una aplicación para administrar un Backend para un Single Sign
 - Documenta clases y métodos públicos utilizando comentarios XML (`/// <summary>`).
 
 ## 3. Estructura de Proyectos
-Asume la siguiente estructura de solución:
-- `[NombreProyecto].Data`: Acceso y Mapeo a la base de Datos.Implementación de EF Core.
-- `[NombreProyecto].Models`: Entidades base.
-- `[NombreProyecto].Application`: Casos de uso y lógica de negocios.
-- `[NombreProyecto].API`: Controladores, middlewares y configuración de la API.
-- `[NombreProyecto].Web`: Sitio Web para administrar la aplicación
-- `[NombreProyecto].Test`: Casos de Test para cubrir los criterios de aceptación
+Todo el código de la solución debe generarse dentro del folder `./src` (en la raíz
+del repositorio). El archivo de solución (`.sln`) también debe vivir en `./src`
+(ej. `./src/[NombreProyecto].sln`). Cada proyecto vive en su propia carpeta bajo `./src`:
+- `./src/[NombreProyecto].Data`: Acceso y Mapeo a la base de Datos.Implementación de EF Core.
+- `./src/[NombreProyecto].Models`: Entidades base.
+- `./src/[NombreProyecto].Application`: Casos de uso y lógica de negocios.
+- `./src/[NombreProyecto].API`: Controladores, middlewares y configuración de la API.
+- `./src/[NombreProyecto].Web`: Sitio Web para administrar la aplicación
+- `./src/[NombreProyecto].Test`: Casos de Test para cubrir los criterios de aceptación
 
 ## 4. Restricciones
 - No expongas entidades del Dominio directamente en las respuestas de la API; utiliza DTOs (Data Transfer Objects).
@@ -34,7 +36,7 @@ Asume la siguiente estructura de solución:
 - Evita llamadas asíncronas bloqueantes (no uses `.Result` o `.Wait()`); utiliza siempre `await`.
 
 ## 5. Comandos y Verificaciones (CLI)
-Antes de declarar una tarea como terminada, el agente debe ejecutar los siguientes comandos en la terminal desde la raíz del proyecto:
+Antes de declarar una tarea como terminada, el agente debe ejecutar los siguientes comandos en la terminal desde el folder `./src` (donde vive el `.sln`):
 - Restaurar dependencias: `dotnet restore`
 - Construir solución: `dotnet build`
 - Ejecutar pruebas: `dotnet test`
