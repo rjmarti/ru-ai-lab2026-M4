@@ -38,10 +38,10 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 **Purpose**: Solution scaffolding and cross-cutting tooling
 
-- [ ] T001 Create `src/SsoAdmin.sln` and the six projects (`SsoAdmin.Models`, `SsoAdmin.Data`, `SsoAdmin.Application`, `SsoAdmin.API`, `SsoAdmin.Web`, `SsoAdmin.Test`) under `./src`, with project references: `Data`→`Models`; `Application`→`Models`,`Data`; `API`→`Application`,`Data`,`Models`; `Web`→`Application`,`Data`,`Models`; `Test`→ all five
-- [ ] T002 Add NuGet dependencies per project: `Microsoft.EntityFrameworkCore.SqlServer` + `Microsoft.EntityFrameworkCore.Design` (`SsoAdmin.Data`), `FluentValidation` (`SsoAdmin.Application`), `Microsoft.AspNetCore.Authentication.Cookies` + `Microsoft.AspNetCore.Identity` + `Swashbuckle.AspNetCore` (`SsoAdmin.API`), `xunit` + `Microsoft.AspNetCore.Mvc.Testing` + `Microsoft.EntityFrameworkCore.Sqlite` (`SsoAdmin.Test`)
-- [ ] T003 [P] Create `appsettings.json`/`appsettings.Development.json` skeletons with placeholder keys `ConnectionStrings:Default` and `SsoApiKey:Value` in `SsoAdmin.API/appsettings.json` and `SsoAdmin.Web/appsettings.json` (Principle II — no literal secrets)
-- [ ] T004 [P] Create `src/Directory.Build.props` setting `LangVersion=12`, `Nullable=enable`, `ImplicitUsings=enable` for all projects
+- [X] T001 Create `src/SsoAdmin.sln` and the six projects (`SsoAdmin.Models`, `SsoAdmin.Data`, `SsoAdmin.Application`, `SsoAdmin.API`, `SsoAdmin.Web`, `SsoAdmin.Test`) under `./src`, with project references: `Data`→`Models`; `Application`→`Models`,`Data`; `API`→`Application`,`Data`,`Models`; `Web`→`Application`,`Data`,`Models`; `Test`→ all five
+- [X] T002 Add NuGet dependencies per project: `Microsoft.EntityFrameworkCore.SqlServer` + `Microsoft.EntityFrameworkCore.Design` (`SsoAdmin.Data`), `FluentValidation` (`SsoAdmin.Application`), `Microsoft.AspNetCore.Authentication.Cookies` + `Microsoft.AspNetCore.Identity` + `Swashbuckle.AspNetCore` (`SsoAdmin.API`), `xunit` + `Microsoft.AspNetCore.Mvc.Testing` + `Microsoft.EntityFrameworkCore.Sqlite` (`SsoAdmin.Test`)
+- [X] T003 [P] Create `appsettings.json`/`appsettings.Development.json` skeletons with placeholder keys `ConnectionStrings:Default` and `SsoApiKey:Value` in `SsoAdmin.API/appsettings.json` and `SsoAdmin.Web/appsettings.json` (Principle II — no literal secrets)
+- [X] T004 [P] Create `src/Directory.Build.props` setting `LangVersion=12`, `Nullable=enable`, `ImplicitUsings=enable` for all projects
 
 **Checkpoint**: Solution builds (`dotnet build`) with empty projects wired together.
 
