@@ -88,17 +88,17 @@ all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENT
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T028 [P] [US1] Integration test suite covering AC1-AC8 (allowed=true, `permiso_vencido`, `usuario_inactivo`, `aplicacion_no_encontrada`, `credencial_no_encontrada`, `permiso_no_encontrado` incl. `fecha_desde` futura edge case, missing-field 400, missing/invalid API key 401) plus a `500 Internal Server Error` scenario (FR-009) by substituting a faulted repository into the test `WebApplicationFactory`, in `SsoAdmin.Test/Integration/SsoVerificarEndpointTests.cs` (depends on T026, API fixture)
-- [ ] T029 [P] [US1] Unit tests for `VerificarAccesoHandler` motivo precedence and business rules (no HTTP, no I/O) in `SsoAdmin.Test/Unit/VerificarAccesoHandlerTests.cs`
+- [X] T028 [P] [US1] Integration test suite covering AC1-AC8 (allowed=true, `permiso_vencido`, `usuario_inactivo`, `aplicacion_no_encontrada`, `credencial_no_encontrada`, `permiso_no_encontrado` incl. `fecha_desde` futura edge case, missing-field 400, missing/invalid API key 401) plus a `500 Internal Server Error` scenario (FR-009) by substituting a faulted repository into the test `WebApplicationFactory`, in `SsoAdmin.Test/Integration/SsoVerificarEndpointTests.cs` (depends on T026, API fixture)
+- [X] T029 [P] [US1] Unit tests for `VerificarAccesoHandler` motivo precedence and business rules (no HTTP, no I/O) in `SsoAdmin.Test/Unit/VerificarAccesoHandlerTests.cs`
 
 ### Implementation for User Story 1
 
-- [ ] T030 [US1] Create `VerificarAccesoRequest`/`VerificarAccesoResponse` DTOs in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoDtos.cs`
-- [ ] T031 [US1] Create `VerificarAccesoValidator` (FluentValidation: `username`/`emisor`/`aplicacionUrl` required) in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoValidator.cs`
-- [ ] T032 [US1] Implement `VerificarAccesoHandler` resolving motivo precedence (`credencial_no_encontrada` → `usuario_inactivo` → `aplicacion_no_encontrada` → `permiso_no_encontrado` → `permiso_vencido` → allowed) using `ICredencialRepository`/`IAplicacionRepository`/`IPermisoAccesoRepository`, logged via `ILogger<T>`, in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoHandler.cs` (depends on T030, T031, T019-T023)
-- [ ] T033 [US1] Create `ApiKeyAuthenticationHandler` + `ApiKeyAuthenticationOptions` validating header `X-Api-Key` against `IOptions<SsoApiKeyOptions>` (FR-016) in `SsoAdmin.API/Auth/ApiKeyAuthenticationHandler.cs`
-- [ ] T034 [US1] Create `SsoController` with `POST /api/sso/verificar`, `[Authorize(AuthenticationSchemes = "ApiKey")]`, returning `200`/`400`/`401`/`500` per contract in `SsoAdmin.API/Controllers/SsoController.cs` (depends on T032, T033)
-- [ ] T035 [US1] Register the `ApiKey` authentication scheme and bind `SsoApiKeyOptions` from configuration in `SsoAdmin.API/Program.cs` (depends on T033)
+- [X] T030 [US1] Create `VerificarAccesoRequest`/`VerificarAccesoResponse` DTOs in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoDtos.cs`
+- [X] T031 [US1] Create `VerificarAccesoValidator` (FluentValidation: `username`/`emisor`/`aplicacionUrl` required) in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoValidator.cs`
+- [X] T032 [US1] Implement `VerificarAccesoHandler` resolving motivo precedence (`credencial_no_encontrada` → `usuario_inactivo` → `aplicacion_no_encontrada` → `permiso_no_encontrado` → `permiso_vencido` → allowed) using `ICredencialRepository`/`IAplicacionRepository`/`IPermisoAccesoRepository`, logged via `ILogger<T>`, in `SsoAdmin.Application/Features/VerificarAcceso/VerificarAccesoHandler.cs` (depends on T030, T031, T019-T023)
+- [X] T033 [US1] Create `ApiKeyAuthenticationHandler` + `ApiKeyAuthenticationOptions` validating header `X-Api-Key` against `IOptions<SsoApiKeyOptions>` (FR-016) in `SsoAdmin.API/Auth/ApiKeyAuthenticationHandler.cs`
+- [X] T034 [US1] Create `SsoController` with `POST /api/sso/verificar`, `[Authorize(AuthenticationSchemes = "ApiKey")]`, returning `200`/`400`/`401`/`500` per contract in `SsoAdmin.API/Controllers/SsoController.cs` (depends on T032, T033)
+- [X] T035 [US1] Register the `ApiKey` authentication scheme and bind `SsoApiKeyOptions` from configuration in `SsoAdmin.API/Program.cs` (depends on T033)
 
 **Checkpoint**: User Story 1 is fully functional and independently testable — MVP deliverable.
 

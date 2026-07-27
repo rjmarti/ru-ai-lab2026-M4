@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using SsoAdmin.API.Auth;
+using SsoAdmin.Application;
 using SsoAdmin.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -6,6 +8,16 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Cadena de conexión externalizada (Principio II).
 string connectionString = builder.Configuration.GetConnectionString("Default") ?? string.Empty;
 builder.Services.AddSsoAdminData(connectionString);
+builder.Services.AddSsoAdminApplication();
+
+// Clave de API del endpoint SSO, externalizada (FR-016 / Principio II).
+builder.Services.Configure<SsoApiKeyOptions>(
+    builder.Configuration.GetSection(SsoApiKeyOptions.SectionName));
+
+builder.Services.AddAuthentication(ApiKeyAuthenticationOptions.SchemeName)
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyAuthenticationOptions.SchemeName, _ => { });
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -22,6 +34,14 @@ using (IServiceScope scope = app.Services.CreateScope())
         await context.Database.EnsureCreatedAsync();
     }
 }
+
+// Manejo global de errores: toda excepción no controlada se traduce a 500 sin filtrar
+// detalles internos (FR-009). Aplica en todos los ambientes por ser una API de máquina.
+app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+{
+    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    await context.Response.WriteAsJsonAsync(new { error = "internal_error" });
+}));
 
 if (app.Environment.IsDevelopment())
 {
