@@ -1,6 +1,6 @@
 # Implementation Plan: Backend de Administración para SSO
 
-**Branch**: `001-sso-admin-backend` | **Date**: 2026-07-20 | **Spec**: [spec.md](./spec.md)
+**Branch**: `001-sso-admin-backend` | **Date**: 2026-07-27 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-sso-admin-backend/spec.md`
 
@@ -65,65 +65,70 @@ specs/001-sso-admin-backend/
 └── tasks.md              # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
 ```
 
-### Source Code (repository root)
+### Source Code (`./src`)
+
+Todo el código de la solución vive bajo `./src` (AGENTS.md §3): el archivo de solución
+`SsoAdmin.sln` y las carpetas de los seis proyectos. Los comandos `dotnet` se ejecutan
+desde `./src`.
 
 ```text
-SsoAdmin.sln
-SsoAdmin.Models/                  # Entidades de dominio: Usuario, Credencial, Aplicacion, PermisoAcceso, LoginSI
-├── Usuario.cs
-├── Credencial.cs
-├── Aplicacion.cs
-├── PermisoAcceso.cs
-└── LoginSI.cs
-
-SsoAdmin.Data/                    # EF Core: DbContext, configuraciones fluent, migraciones, repositorios
-├── SsoAdminDbContext.cs
-├── Configurations/                # IEntityTypeConfiguration<T> por entidad (índices únicos, relaciones)
-├── Migrations/
-├── Seed/                          # Carga del usuario admin/admin en primer arranque (FR-007)
-└── Repositories/
-
-SsoAdmin.Application/             # Vertical Slice Architecture: un folder por caso de uso
-├── Features/
-│   ├── VerificarAcceso/           # US1 — Command/Query + Handler + Validator + DTOs (motivo, allowed)
-│   ├── AuthSI/                    # US2 — Login SI (hash, emisión de cookie)
-│   ├── GestionUsuarios/           # US2 — listar/crear/editar/dar de baja
-│   ├── GestionCredenciales/       # US3 — listar/crear/eliminar, validación de unicidad
-│   ├── GestionAplicaciones/       # US4 — listar/crear/editar/eliminar
-│   └── GestionPermisos/           # US4 — otorgar/revocar, validación de solapamiento
-└── Common/                        # Interfaces compartidas, resultado de dominio, excepciones
-
-SsoAdmin.API/                     # Host ASP.NET Core — expone únicamente el contrato externo consumido por el SSO
-├── Controllers/
-│   └── SsoController.cs           # POST /api/sso/verificar (auth: API key)
-├── Auth/
-│   └── ApiKeyAuthenticationHandler.cs
-├── DTOs/
-└── Program.cs
-
-SsoAdmin.Web/                     # Host ASP.NET Core — Razor Pages + su propia API interna, cookie auth
-├── Pages/
-│   ├── Login.cshtml
-│   ├── Usuarios/
-│   ├── Credenciales/
-│   ├── Aplicaciones/
-│   └── Permisos/
-├── Controllers/                   # API interna consumida same-origin por wwwroot/js (mismo host: sin salto de cookie)
-│   ├── AuthController.cs          # login SI, emite cookie de este mismo host
-│   ├── UsuariosController.cs
-│   ├── CredencialesController.cs
-│   ├── AplicacionesController.cs
-│   └── PermisosController.cs
-├── wwwroot/js/                    # fetch() same-origin a los Controllers de este mismo host
-└── Program.cs
-
-SsoAdmin.Test/                    # xUnit
-├── Unit/                          # Handlers de Application (reglas de negocio, sin I/O real)
-├── Integration/                   # WebApplicationFactory contra SsoAdmin.API y SsoAdmin.Web + SQLite relacional
-└── TestFixtures/
+src/
+├── SsoAdmin.sln
+├── SsoAdmin.Models/                  # Entidades de dominio: Usuario, Credencial, Aplicacion, PermisoAcceso, LoginSI
+│   ├── Usuario.cs
+│   ├── Credencial.cs
+│   ├── Aplicacion.cs
+│   ├── PermisoAcceso.cs
+│   └── LoginSI.cs
+│
+├── SsoAdmin.Data/                    # EF Core: DbContext, configuraciones fluent, migraciones, repositorios
+│   ├── SsoAdminDbContext.cs
+│   ├── Configurations/                # IEntityTypeConfiguration<T> por entidad (índices únicos, relaciones)
+│   ├── Migrations/
+│   ├── Seed/                          # Carga del usuario admin/admin en primer arranque (FR-007)
+│   └── Repositories/
+│
+├── SsoAdmin.Application/             # Vertical Slice Architecture: un folder por caso de uso
+│   ├── Features/
+│   │   ├── VerificarAcceso/           # US1 — Command/Query + Handler + Validator + DTOs (motivo, allowed)
+│   │   ├── AuthSI/                    # US2 — Login SI (hash, emisión de cookie)
+│   │   ├── GestionUsuarios/           # US2 — listar/crear/editar/dar de baja
+│   │   ├── GestionCredenciales/       # US3 — listar/crear/eliminar, validación de unicidad
+│   │   ├── GestionAplicaciones/       # US4 — listar/crear/editar/eliminar
+│   │   └── GestionPermisos/           # US4 — otorgar/revocar, validación de solapamiento
+│   └── Common/                        # Interfaces compartidas, resultado de dominio, excepciones
+│
+├── SsoAdmin.API/                     # Host ASP.NET Core — expone únicamente el contrato externo consumido por el SSO
+│   ├── Controllers/
+│   │   └── SsoController.cs           # POST /api/sso/verificar (auth: API key)
+│   ├── Auth/
+│   │   └── ApiKeyAuthenticationHandler.cs
+│   ├── DTOs/
+│   └── Program.cs
+│
+├── SsoAdmin.Web/                     # Host ASP.NET Core — Razor Pages + su propia API interna, cookie auth
+│   ├── Pages/
+│   │   ├── Login.cshtml
+│   │   ├── Usuarios/
+│   │   ├── Credenciales/
+│   │   ├── Aplicaciones/
+│   │   └── Permisos/
+│   ├── Controllers/                   # API interna consumida same-origin por wwwroot/js (mismo host: sin salto de cookie)
+│   │   ├── AuthController.cs          # login SI, emite cookie de este mismo host
+│   │   ├── UsuariosController.cs
+│   │   ├── CredencialesController.cs
+│   │   ├── AplicacionesController.cs
+│   │   └── PermisosController.cs
+│   ├── wwwroot/js/                    # fetch() same-origin a los Controllers de este mismo host
+│   └── Program.cs
+│
+└── SsoAdmin.Test/                    # xUnit
+    ├── Unit/                          # Handlers de Application (reglas de negocio, sin I/O real)
+    ├── Integration/                   # WebApplicationFactory contra SsoAdmin.API y SsoAdmin.Web + SQLite relacional
+    └── TestFixtures/
 ```
 
-**Structure Decision**: Aplicación web (Option 2 del template) adaptada a los seis proyectos exigidos por AGENTS.md §3. `API` y `Web` son hosts ASP.NET Core independientes y desplegables por separado (para no acoplar el SLA de <500ms del endpoint SSO al ciclo de vida de la app de administración), y ambos referencian `Application`, `Data` y `Models` directamente en proceso — sin salto HTTP interno entre `Web` y `API`. El contrato de administración (auth, usuarios, credenciales, aplicaciones, permisos) se expone como API interna dentro del propio host `Web` (mismo origen que su JS vanilla), evitando cualquier configuración de cookie/CORS cross-host; `SsoAdmin.API` expone exclusivamente `POST /api/sso/verificar` para el consumidor externo. Dentro de `Application`, el código se organiza por **Vertical Slice** (un folder por caso de uso, con su propio Command/Query, Handler, Validator y DTOs) en lugar de por capas técnicas horizontales, consistente con el patrón de arquitectura exigido por AGENTS.md.
+**Structure Decision**: Aplicación web (Option 2 del template) adaptada a los seis proyectos exigidos por AGENTS.md §3, con **todo el código bajo `./src`** (solución y proyectos) según la convención de AGENTS.md §3; los comandos `dotnet restore/build/test` se ejecutan desde `./src`. `API` y `Web` son hosts ASP.NET Core independientes y desplegables por separado (para no acoplar el SLA de <500ms del endpoint SSO al ciclo de vida de la app de administración), y ambos referencian `Application`, `Data` y `Models` directamente en proceso — sin salto HTTP interno entre `Web` y `API`. El contrato de administración (auth, usuarios, credenciales, aplicaciones, permisos) se expone como API interna dentro del propio host `Web` (mismo origen que su JS vanilla), evitando cualquier configuración de cookie/CORS cross-host; `SsoAdmin.API` expone exclusivamente `POST /api/sso/verificar` para el consumidor externo. Dentro de `Application`, el código se organiza por **Vertical Slice** (un folder por caso de uso, con su propio Command/Query, Handler, Validator y DTOs) en lugar de por capas técnicas horizontales, consistente con el patrón de arquitectura exigido por AGENTS.md.
 
 ## Complexity Tracking
 

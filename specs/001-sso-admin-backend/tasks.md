@@ -16,18 +16,21 @@ description: "Task list for Backend de Administración para SSO"
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Maps the task to US1/US2/US3/US4 for traceability
-- File paths are exact, relative to repository root
+- File paths are exact, relative to `./src` (where `SsoAdmin.sln` lives — AGENTS.md §3)
 
 ## Path Conventions
 
-Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
+**All solution code lives under `./src`** (AGENTS.md §3): `src/SsoAdmin.sln` plus the six
+project folders below. Every `SsoAdmin.*/...` path in the tasks is relative to `./src`, and
+all `dotnet` commands are run from `./src`. Six-project solution fixed by `AGENTS.md` §3 /
+`plan.md` Project Structure:
 
-- `SsoAdmin.Models/` — domain entities
-- `SsoAdmin.Data/` — EF Core DbContext, configurations, migrations, seed, repositories
-- `SsoAdmin.Application/` — Vertical Slice features (Command/Query + Handler + Validator + DTOs)
-- `SsoAdmin.API/` — ASP.NET Core host: `SsoController` only (external SSO contract), API key auth, Program.cs
-- `SsoAdmin.Web/` — ASP.NET Core host: Razor Pages, Bootstrap, JS vanilla, cookie auth, plus the internal admin API controllers (auth/usuarios/credenciales/aplicaciones/permisos) consumed same-origin by its own JS
-- `SsoAdmin.Test/` — xUnit: `Unit/`, `Integration/`, `TestFixtures/`
+- `src/SsoAdmin.Models/` — domain entities
+- `src/SsoAdmin.Data/` — EF Core DbContext, configurations, migrations, seed, repositories
+- `src/SsoAdmin.Application/` — Vertical Slice features (Command/Query + Handler + Validator + DTOs)
+- `src/SsoAdmin.API/` — ASP.NET Core host: `SsoController` only (external SSO contract), API key auth, Program.cs
+- `src/SsoAdmin.Web/` — ASP.NET Core host: Razor Pages, Bootstrap, JS vanilla, cookie auth, plus the internal admin API controllers (auth/usuarios/credenciales/aplicaciones/permisos) consumed same-origin by its own JS
+- `src/SsoAdmin.Test/` — xUnit: `Unit/`, `Integration/`, `TestFixtures/`
 
 ---
 
@@ -35,10 +38,10 @@ Six-project solution fixed by `AGENTS.md` §3 / `plan.md` Project Structure:
 
 **Purpose**: Solution scaffolding and cross-cutting tooling
 
-- [ ] T001 Create `SsoAdmin.sln` and the six projects (`SsoAdmin.Models`, `SsoAdmin.Data`, `SsoAdmin.Application`, `SsoAdmin.API`, `SsoAdmin.Web`, `SsoAdmin.Test`) at repository root, with project references: `Data`→`Models`; `Application`→`Models`,`Data`; `API`→`Application`,`Data`,`Models`; `Web`→`Application`,`Data`,`Models`; `Test`→ all five
+- [ ] T001 Create `src/SsoAdmin.sln` and the six projects (`SsoAdmin.Models`, `SsoAdmin.Data`, `SsoAdmin.Application`, `SsoAdmin.API`, `SsoAdmin.Web`, `SsoAdmin.Test`) under `./src`, with project references: `Data`→`Models`; `Application`→`Models`,`Data`; `API`→`Application`,`Data`,`Models`; `Web`→`Application`,`Data`,`Models`; `Test`→ all five
 - [ ] T002 Add NuGet dependencies per project: `Microsoft.EntityFrameworkCore.SqlServer` + `Microsoft.EntityFrameworkCore.Design` (`SsoAdmin.Data`), `FluentValidation` (`SsoAdmin.Application`), `Microsoft.AspNetCore.Authentication.Cookies` + `Microsoft.AspNetCore.Identity` + `Swashbuckle.AspNetCore` (`SsoAdmin.API`), `xunit` + `Microsoft.AspNetCore.Mvc.Testing` + `Microsoft.EntityFrameworkCore.Sqlite` (`SsoAdmin.Test`)
 - [ ] T003 [P] Create `appsettings.json`/`appsettings.Development.json` skeletons with placeholder keys `ConnectionStrings:Default` and `SsoApiKey:Value` in `SsoAdmin.API/appsettings.json` and `SsoAdmin.Web/appsettings.json` (Principle II — no literal secrets)
-- [ ] T004 [P] Create `Directory.Build.props` at repository root setting `LangVersion=12`, `Nullable=enable`, `ImplicitUsings=enable` for all projects
+- [ ] T004 [P] Create `src/Directory.Build.props` setting `LangVersion=12`, `Nullable=enable`, `ImplicitUsings=enable` for all projects
 
 **Checkpoint**: Solution builds (`dotnet build`) with empty projects wired together.
 

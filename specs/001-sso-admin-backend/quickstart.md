@@ -10,7 +10,10 @@ Guía para validar la feature de punta a punta una vez implementada. Referencia 
 
 ## 1. Restaurar, compilar y probar (obligatorio antes de dar por terminada cualquier tarea — AGENTS.md §5)
 
+Todos los comandos `dotnet` se ejecutan desde `./src` (donde vive `SsoAdmin.sln`, AGENTS.md §3).
+
 ```powershell
+cd src
 dotnet restore
 dotnet build
 dotnet test
@@ -21,7 +24,7 @@ Todos los tests en `SsoAdmin.Test` deben pasar, incluidos los que trazan a cada 
 ## 2. Configurar secretos locales (Principio II — nunca hardcodeados)
 
 ```powershell
-cd SsoAdmin.API
+cd src/SsoAdmin.API
 dotnet user-secrets set "ConnectionStrings:Default" "Server=(localdb)\mssqllocaldb;Database=SsoAdmin;Trusted_Connection=True;"
 dotnet user-secrets set "SsoApiKey:Value" "<valor-de-desarrollo>"
 ```
@@ -29,6 +32,7 @@ dotnet user-secrets set "SsoApiKey:Value" "<valor-de-desarrollo>"
 ## 3. Aplicar migraciones y seed inicial
 
 ```powershell
+cd src
 dotnet ef database update --project SsoAdmin.Data --startup-project SsoAdmin.API
 ```
 
@@ -37,6 +41,7 @@ Al primer arranque de `SsoAdmin.API` (o `SsoAdmin.Web`, según dónde se registr
 ## 4. Levantar los dos hosts
 
 ```powershell
+# desde ./src
 dotnet run --project SsoAdmin.API
 dotnet run --project SsoAdmin.Web
 ```
